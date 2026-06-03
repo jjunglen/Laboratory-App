@@ -7,7 +7,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 // Database connection
-const sequelize = require("./src/config/database.js");
+const { sequelize, connectDB } = require("./src/config/database.js");
 
 // Routes imports
 const authRoutes = require("./src/routes/auth.routes.js");
