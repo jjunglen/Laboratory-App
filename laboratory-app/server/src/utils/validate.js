@@ -28,3 +28,26 @@ const isValidSize = (size) => {
     ];
     return validSizes.includes(String(size));
 }
+
+// Checks that a price is a positive number
+const isValidPrice = (price) => {
+    return price === null || price === undefined || Number(price) >= 0;
+};
+
+// Checks required fields
+const requireFields = (body, fields) => {
+    const missing = fields.filter((field) => {
+        return (
+            body[field] === undefined || body[field] === null || body[field] === ""
+        );
+    });
+    return missing;
+}
+
+module.exports = {
+    isValidEmail,
+    isValidPassword,
+    isValidPrice,
+    isValidSize,
+    requireFields,
+}
