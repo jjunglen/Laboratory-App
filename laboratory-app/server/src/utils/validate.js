@@ -7,8 +7,13 @@ const isValidEmail = (email) => {
 
 // Checks if password meets min requirements
 const isValidPassword = (password) => {
-    return typeof password === 'string' && password.length >= 8;
+  if (typeof password !== "string") return false;
+  if (password.length < 8) return false;
 
+  const hasNumber = /\d/.test(password);
+  const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+  return hasNumber && hasSymbol;
 };
 
 // Check if a shoe size is valid

@@ -9,6 +9,9 @@ const morgan = require("morgan");
 // Database connection
 const { sequelize, connectDB } = require("./src/config/database.js");
 
+// Models connection
+require("./src/models/index.js");
+
 // Routes imports
 const authRoutes = require("./src/routes/auth.routes.js");
 const userRoutes = require("./src/routes/user.routes.js");

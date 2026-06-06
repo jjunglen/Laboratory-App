@@ -11,7 +11,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
             rejectUnauthorized: false
         },
     },
-    logging: true,
+    logging: false,
 });
 
 // connection testing
