@@ -36,6 +36,14 @@ const Alert = sequelize.define("Alert", {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    condition_preference: {
+        type: DataTypes.ENUM("brand_new", "pre_owned", "either"),
+        defaultValue: "either",
+    },
+    box_preference: {
+        type: DataTypes.ENUM("original_good", "any", "no_preference"),
+        defaultValue: "no_preference",
+    },
     max_price: {
         type: DataTypes.DECIMAL(10, 2), 
         allowNull: true,

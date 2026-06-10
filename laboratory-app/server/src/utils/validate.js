@@ -39,6 +39,18 @@ const isValidPrice = (price) => {
     return price === null || price === undefined || Number(price) >= 0;
 };
 
+// Checks that condition preference is valid
+const isValidCondition = (condition) => {
+    return ["brand_new", "pre_owned", "either"].includes(condition);
+
+}
+
+// Checks that box preference is valid
+const isValidBoxPreference = (box) => {
+    return ["original_good", "any", "no_preference"].includes(box);
+
+}
+
 // Checks required fields
 const requireFields = (body, fields) => {
     const missing = fields.filter((field) => {
@@ -55,4 +67,6 @@ module.exports = {
     isValidPrice,
     isValidSize,
     requireFields,
+    isValidCondition,
+    isValidBoxPreference,
 }
