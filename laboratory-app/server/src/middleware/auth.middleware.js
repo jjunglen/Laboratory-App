@@ -16,7 +16,7 @@ const authenticateToken = async (req, res, next) => {
 
         // Pull the token from the header
         const token = authHeader.split(" ")[1];
-
+        
         // Verify the token and decode
         const decoded = verifyToken(token);
 

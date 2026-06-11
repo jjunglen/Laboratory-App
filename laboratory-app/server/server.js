@@ -92,7 +92,7 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log("Connected to Supabase PostgreSQL");
 
-        await sequelize.sync({ alter: false });
+        await sequelize.sync({ force: false });
         console.log("Models synced");
 
         app.listen(PORT, () => {

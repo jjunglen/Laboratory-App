@@ -42,6 +42,16 @@ const Inventory = sequelize.define("Inventory", {
         defaultValue: 0,
         comment: "stock quantity - 0 means out of stock",
     },
+    condition: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "brand new or pre owned parsed from shopify variant title"
+    },
+    box_status: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: "Box condition - parsed from shopify variant title"
+    },
     shopify_url: {
         type: DataTypes.STRING,
         allowNull: true,

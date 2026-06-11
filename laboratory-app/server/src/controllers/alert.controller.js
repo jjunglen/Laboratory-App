@@ -1,6 +1,7 @@
 const { Alert, Inventory } = require("../models/index.js");
 const { isValidSize, isValidPrice, requireFields } = require("../utils/validate.js");
 const { success, created, badRequest, notFound, forbidden, serverError } = require("../utils/response.js");
+const { getUserAlertStats } = require("../services/alert.service.js");
 
 // GET ALERTS
 // GET /api/alerts
@@ -12,7 +13,9 @@ const getAlerts = async (req, res) => {
             order: [["created_at", "DESC"]],
         });
 
-        return success(res, alerts);
+        const stats = await getUserAlertStats(req.user.id);
+
+        return success(res, {alerts, stats});
 
     } catch(error) {
         console.error("Get alerts error:", error.message);
@@ -41,7 +44,7 @@ const getAlert = async (req, res) => {
 
 
     } catch (error) {
-        console.error("Get alert error:". error.message);
+        console.error("Get alert error:", error.message);
         return serverError(res)
     }
 };
@@ -51,6 +54,9 @@ const getAlert = async (req, res) => {
 // Create a new alert for the logged in user
 const createAlert = async (req, res) => {
     try {
+        console.log("REQ USER:", req.user);
+        console.log("REQ USER ID:", req.user.id);
+
         const { shoe_name, sku, size, max_price, notify_email, notify_inapp, stockx_product_id } = req.body;
 
         // Check required fields
@@ -69,7 +75,7 @@ const createAlert = async (req, res) => {
         // Checks if user has an active alert for this shoe and size
         const existingAlert = await Alert.findOne({
             where: {
-                user_id: req.user_id,
+                user_id: req.user.id,
                 shoe_name,
                 size,
                 active: true,
@@ -83,7 +89,7 @@ const createAlert = async (req, res) => {
 
         // Create an alert
         const alert = await Alert.create({
-            user_id: req.user_id,
+            user_id: req.user.id,
             shoe_name,
             size,
             sku: sku || null,
@@ -93,7 +99,7 @@ const createAlert = async (req, res) => {
             stockx_product_id: stockx_product_id || null,
         });
 
-        return created(res, "Alert created successfully");
+        return created(res, alert, "Alert created successfully");
 
 
     } catch(error) {
@@ -143,7 +149,7 @@ const updateAlert = async (req, res) => {
             active: active ?? alert.active,
         });
 
-        return succes(res, "Alert updated successfully");
+        return succes(res, alert, "Alert updated successfully");
 
     } catch(error) {
         console.error("Update alert error:", error.message);
@@ -170,11 +176,11 @@ const deleteAlert = async (req, res) => {
 
         await alert.destroy();
 
-        return succes(res, null, "Alert deleted successfully");        
+        return success(res, null, "Alert deleted successfully");       
 
     } catch (error) {
         console.error("Delete alert error:", error.message);
-        serverError(res);
+        return serverError(res);
     }
 };
 
