@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const { authenticateToken } = require("../middleware/auth.middleware.js");
+const { trackRedirect } = require("../controllers/redirect.controller.js");
+
+// GET /api/redirect - logs the click then redirectrs to shopify
+router.get("/", authenticateToken, trackRedirect);
 
 // Placeholder — routes coming soon
-router.get("/", (req, res) => {
-  res.status(200).json({ message: "Route is connected" });
-});
 
 module.exports = router;
