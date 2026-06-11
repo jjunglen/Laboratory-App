@@ -7,7 +7,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "scan": "semgrep --config=auto src/ server.js",
-    "seed": "node src/seeders/seed.js"
+    "seed": "node src/seeders/seed.js",
+    "register-webhooks": "node src/scripts/registerWebhooks.js"
   },
   "keywords": [],
   "author": "",

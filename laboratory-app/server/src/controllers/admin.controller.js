@@ -1,8 +1,6 @@
 const { User, Alert, NotificationLog, Inventory, AlertClick, Purchase } = require("../models/index.js");
-const { success, notFound, serverError, badRequest } = require("../utils/response.js");
-const { Op, where } = require("sequelize");
-const { getAllShopifyProducts } = require("../services/shopify.service.js");
-const { parseVarientTitle } = require("../utils/parseVariantTitle.js");
+const { success, notFound, serverError } = require("../utils/response.js");
+const { Op} = require("sequelize");
 
 
 
@@ -135,43 +133,16 @@ const getStats = async (req, res) => {
 // MANUAL INVENTORY SYNC
 // POST /api/admin/inventory/sync
 const manualInventorySync = async (req, res) => {
-    try {
-        const products = await getAllShopifyProducts();
+  try {
+    // Reset all inventory to 0
+    // Shopify webhooks will repopulate as products come in
+    await Inventory.update({ available: 0 }, { where: {} });
 
-        if (!products.length) {
-            return badRequest(res, "No products found in Shopify store");
+    return success(res, null, "Inventory reset successfully — Shopify webhooks will resync automatically");
 
-        }
-
-        await Inventory.update({ available: 0 }, {where: {}});
-
-        for (const product of products) {
-            for (const variant of product.variants) {
-                const { size, condition, boxCondition } = parseVarientTitle(variant.title);
-
-                await Inventory.upsert({
-                    shopify_product_id: String(product.id),
-                    shopify_variant_id: String(variant.id),
-                    shoe_name: product.title,
-                    sku: variant.sku || null,
-                    size: size,
-                    condition: condition,
-                    box_status: boxCondition,
-                    price: parseFloat(variant.price) || null,
-                    available: variant.inventory_quantity || 0,
-                    shopify_url: `https://thelabdtx.com/products/${product.handle}`,
-                    image_url: product.images?.[0]?.src || null,
-                    last_synced_at: new Date(),
-                })
-            }
-        }
-
-        return success(res, null, `Synced ${products.length} products from Shopify successfully`);
-
-    } catch(error) {
+    } catch (error) {
         console.error("Manual inventory sync error:", error.message);
         return serverError(res);
-
     }
 };
 
