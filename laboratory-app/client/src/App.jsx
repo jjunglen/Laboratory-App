@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin"
+import OnboardingSize from "./pages/OnboardingSize";
 
 function App() {
   
@@ -35,6 +36,13 @@ function App() {
             <Route path="/search" element={
               <ProtectedRoute>
                 <Search/>
+              </ProtectedRoute>
+            
+            }/>
+
+            <Route path="/onboarding/size" element={
+              <ProtectedRoute>
+                <OnboardingSize />
               </ProtectedRoute>
             
             }/>

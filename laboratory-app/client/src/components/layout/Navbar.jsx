@@ -96,13 +96,13 @@ export default function Navbar() {
             {/* Logged out — show on both mobile and desktop */}
             <button
               onClick={() => navigate("/auth")}
-              className="text-sm sm:text-xl border border-blue-500 text-blue-500 px-3 py-1.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+              className="text-sm sm:text-xl border border-blue-500 text-blue-500 cursor-pointer px-3 py-1.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
             >
               Log in
             </button>
             <button
               onClick={() => navigate("/auth")}
-              className="hidden md:block text-sm sm:text-xl bg-blue-500 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+              className="hidden md:block text-sm sm:text-xl bg-blue-500 text-white px-3 py-1.5 cursor-pointer rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
               Sign up free
             </button>

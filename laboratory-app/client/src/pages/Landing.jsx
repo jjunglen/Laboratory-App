@@ -25,12 +25,12 @@ export default function Landing() {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => navigate("/auth")}
-              className="bg-blue-500 text-white font-medium px-5 py-2.5 text-xs md:text-lg tracking-wider md:tracking-normal rounded-lg hover:bg-blue-600 transition-colors active:bg-blue-500"
+              className="bg-blue-500 text-white font-medium cursor-pointer px-5 py-2.5 text-xs md:text-lg tracking-wider md:tracking-normal rounded-lg hover:bg-blue-600 transition-colors active:bg-blue-500"
             >
               Create your alerts
             </button>
             <button
-              className="border border-blue-500 text-blue-500 text-xs md:text-lg tracking-wider md:tracking-normal px-5 py-2.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+              className="border border-blue-500 text-blue-500 cursor-pointer text-xs md:text-lg tracking-wider md:tracking-normal px-5 py-2.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
               onClick={() => navigate("/search")}
             >
               Browse inventory
@@ -113,7 +113,7 @@ export default function Landing() {
             <p className="text-xs md:text-base text-zinc-500 mb-6">Join The Laboratory and never miss your size again.</p>
             <button
                 onClick={() => navigate("auth")}
-                className="bg-blue-500 text-white text-sm md:text-base font-medium px-6 py-3 rounded-lg hover:bg-blue-600 active:bg-blue-500 transition-colors "
+                className="bg-blue-500 text-white cursor-pointer text-sm md:text-base font-medium px-6 py-3 rounded-lg hover:bg-blue-600 active:bg-blue-500 transition-colors "
             >
                 Get started free
             </button>

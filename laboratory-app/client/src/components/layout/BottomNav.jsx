@@ -15,7 +15,7 @@ export default function BottomNav() {
     const { token } = useAuth();
 
     // Only show on Mobile when logged in
-    if (!token) return null;
+    // if (!token) return null;
 
     return (
     <div className="fixed bottom-0 left-0 right-0 md:hidden flex justify-around py-3 border-t border-zinc-800 bg-zinc-950 z-50">
