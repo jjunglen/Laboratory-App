@@ -22,6 +22,11 @@ const User = sequelize.define("User", {
             isEmail: true,
         }
     },
+    sizes: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        defaultValue: [],
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: true,

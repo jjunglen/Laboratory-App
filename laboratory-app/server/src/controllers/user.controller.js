@@ -31,7 +31,7 @@ const getProfile = async (req, res) => {
 // Updates the logged in user's profile
 const updateProfile = async (req, res) => {
     try {
-        const { full_name, email, notify_email, notify_inapp } = req.body;
+        const { full_name, email, notify_email, notify_inapp, sizes } = req.body;
 
         // Find the user
         const user = await User.findByPk(req.user.id);
@@ -53,13 +53,20 @@ const updateProfile = async (req, res) => {
             }
         }
 
+        // Validate sizes if provided - must be an array of strings
+        if (sizes && !Array.isArray(sizes)) {
+            return badRequest(res, "Sizes must be an array");
+
+        }
+
         // Update the user
         await user.update({
             full_name: full_name ?? user.full_name,
             email: email ?? user.email,
             notify_email: notify_email ?? user.notify_email,
             notify_inapp: notify_inapp ?? user.notify_inapp,
-        
+            sizes: sizes ?? user.sizes,
+
         });
 
         return success(res, {
@@ -68,6 +75,8 @@ const updateProfile = async (req, res) => {
             full_name: user.full_name,
             notify_email: user.notify_email,
             notify_inapp: user.notify_inapp,
+            sizes: user.sizes,
+            
         }, "Profile updated successfully!");
 
     } catch (error) {
