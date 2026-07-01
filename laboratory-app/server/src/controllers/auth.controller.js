@@ -50,6 +50,7 @@ const register = async (req, res) => {
             email: user.email,
             full_name: user.full_name,
             role: user.role,
+            sizes: user.sizes
         }}, "Account created successfully")
 
     } catch(error) {
@@ -90,6 +91,7 @@ const login = async (req, res) => {
             email: user.email,
             full_name: user.full_name,
             role: user.role,
+            sizes: user.sizes,
         }}, "Logging in successfully")
 
     } catch (error) {
@@ -143,6 +145,7 @@ const googleAuth = async (req, res) => {
             full_name: user.full_name,
             role: user.role,
             avatar_url: user.avatar_url,
+            sizes: user.sizes,
         }}, "Logged in with Google successfully");
     } catch (error) {
         console.error("Google auth error:", error.message);
@@ -165,6 +168,7 @@ const getMe = async (req, res) => {
             avatar_url: user.avatar_url,
             notify_email: user.notify_email,
             notify_inapp: user.notify_inapp,
+            sizes: user.sizes
         });
     } catch (error) {
         console.error("Get me error:", error.message);

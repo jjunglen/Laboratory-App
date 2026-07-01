@@ -52,7 +52,7 @@ export default function Navbar() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         {token ? (
           <>
             {/* Desktop only nav links */}
@@ -62,7 +62,7 @@ export default function Navbar() {
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`hidden md:flex items-center gap-1.5 text-xs transition-colors ${
+                  className={`hidden md:flex cursor-pointer items-center gap-1.5 text-xl transition-colors ${
                     location.pathname === link.path
                       ? "text-blue-500"
                       : "text-zinc-500 hover:text-zinc-300"
@@ -77,16 +77,16 @@ export default function Navbar() {
             {/* Desktop only bell */}
             <button
               onClick={() => navigate("/dashboard")}
-              className="relative hidden md:block text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="relative hidden md:block text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors"
             >
-              <IoNotificationsOutline size={20} />
+              <IoNotificationsOutline size={26} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
             {/* Desktop only avatar */}
             <div
               onClick={() => navigate("/profile")}
-              className="hidden md:flex w-8 h-8 rounded-full bg-blue-700 items-center justify-center text-xs font-medium cursor-pointer hover:bg-blue-600 transition-colors"
+              className="hidden md:flex w-12 h-12 rounded-full bg-blue-700 items-center justify-center text-xs font-medium cursor-pointer hover:bg-blue-600 transition-colors"
             >
               {user?.full_name?.[0]?.toUpperCase() || "HI"}
             </div>
