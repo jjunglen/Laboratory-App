@@ -1,26 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import BottomNav from "../components/layout/BottomNav";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
 import { IoSearchOutline, IoCheckmarkCircle, IoCloseCircleOutline } from "react-icons/io5";
 
-const mockResults = [
-    { name: "Air Jordan 4 Retro Bred Reimagined", sku: "FV5029-006" },
-    { name: "Air Jordan 4 Retro Bred 2019", sku: "308497-060" },
-    { name: "Air Jordan 4 Retro Black Cat", sku: "CU1110-010" },
-    { name: "Air Jordan 4 Retro University Blue", sku: "CT8527-400" },
+const sizeOptions = [
+    "3.5M/5W", "4M/5.5W", "4.5M/6W", "5M/6.5W", "5.5M/7W",
+    "6M/7.5W", "6.5M/8W", "7M/8.5W", "7.5M/9W", "8M/9.5W",
+    "8.5M/10W", "9M/10.5W", "9.5M/11W", "10M/11.5W", "10.5M/12W",
+    "11M/12.5W", "11.5M/13W", "12M/13.5W", "12.5M/14W", "13M/14.5W",
+    "13.5M/15W", "14M/15.5W", "14.5M/16W", "15M", "16M", "17M",
 ];
 
 export default function Search() {
     const [query, setQuery] = useState("");
+    const [results, setResults] = useState([]);
     const [selectedShoe, setSelectedShoe] = useState(null);
+    const [searching, setSearching] = useState(false);
     const [size, setSize] = useState("");
-    const [condition, setCondition ] = useState("Either");
-    const [boxPref, setBoxPref] = useState("No preference");
+    const [condition, setCondition ] = useState("either");
+    const [boxPref, setBoxPref] = useState("no_preference");
     const [maxPrice, setMaxPrice] = useState("");
     const [emailNotif, setEmailNotif] = useState(true);
     const [inAppNotif, setInAppNotif] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [ success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
 
-    const results = query.trim() ? mockResults : [];
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!query.trim()) {
+            setResults([]);
+            return;
+
+        }
+
+        const timeout = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const response = await api.get(`/inventory/search?q=${encodeURIComponent(query)}`);
+                
+
+            } catch(error) {
+                console.error("Search failed:", error)
+
+            } finally {
+                setSearching(false);
+
+            }
+        })
+    })
 
     const handleSubmit = () => {
         console.log({
@@ -116,7 +149,7 @@ export default function Search() {
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center text-center py-16 md:py-24">
-                <p className="text-zinc-600 text-base leading-relaxed max-w-xs">
+                <p className="text-zinc-600 text-sm md:text-base leading-relaxed max-w-xs">
                     Search for a shoe to set up an alert for when it hits our store
                 </p>
                 </div>
@@ -222,7 +255,7 @@ export default function Search() {
                     </>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center py-16 md:py-24">
-                        <p className="text-zinc-600 text-base">Select a shoe from the results to set an alert</p>
+                        <p className="text-zinc-600 text-sm md:text-base">Select a shoe from the results to set an alert</p>
                     </div>
                 )}
             </div>
