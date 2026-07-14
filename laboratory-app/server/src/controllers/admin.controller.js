@@ -3,7 +3,6 @@ const { success, notFound, serverError } = require("../utils/response.js");
 const { Op} = require("sequelize");
 
 
-
 //  GET ALL USERS
 // GET /api/admin/users
 const getAllUsers = async (req, res) => {

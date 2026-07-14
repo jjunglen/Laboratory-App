@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
+import api from "../api/axios.js"
 import {
     IoStatsChartOutline,
     IoPeopleOutline,
@@ -9,29 +11,82 @@ import {
     IoSearchOutline,
 } from "react-icons/io5";
 
-const stats = [
-  { label: "Total users", value: "47", icon: IoPeopleOutline },
-  { label: "Active alerts", value: "124" },
-  { label: "Notifications sent", value: "891" },
-  { label: "Purchases via app", value: "18", green: true },
-];
-
-const recentUsers = [
-  { name: "JP", email: "jp@thelabdtx.com", role: "admin" },
-  { name: "Jordan Smith", email: "jordan@test.com", role: "user" },
-  { name: "Mike Johnson", email: "mike@test.com", role: "user" },
-  { name: "Sarah Williams", email: "sarah@test.com", role: "user" },
-];
-
-const recentAlerts = [
-    { shoe: "Jordan 4 Retro Bred Reimagined", meta: "10M/11.5W · Max $350", user: "jordan@test.com" },
-    { shoe: "Nike Dunk Low Retro Panda", meta: "9.5M/11W · Max $200", user: "jordan@test.com" },
-    { shoe: "New Balance 550 White Green", meta: "8M/9.5W · No max", user: "mike@test.com" },
-    { shoe: "Jordan 1 Chicago Lost and Found", meta: "7M/8.5W · Max $500", user: "sarah@test.com" },
-];
 
 export default function Admin() {
     const [tab, setTab] = useState("overview");
+    const [stats, setStats] = useState(null);
+    const [users, setUsers ] = useState([]);
+    const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [syncMessage, setSyncMessage] = useState("");
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchAll = async () => {
+            try {
+                const [statsRes, usersRes, alertsRes] = await Promise.all([
+                    api.get("/admin/stats"),
+                    api.get("/admin/users"),
+                    api.get("/admin/alerts"),
+                ]);
+                setStats(statsRes.data.data);
+                setUsers(usersRes.data.data || []);
+                setAlerts(alertsRes.data.data || []);
+
+            } catch (error) {
+                console.error("Failed to fetch admin data:", error);
+
+            } finally {
+                setLoading(false);
+
+            }
+        }
+
+        fetchAll();
+    }, []);
+
+    const handleResetInventory = async () => {
+        if (!window.confirm("Reset all inventory to 0? Shopify webhooks will resync automatically")) return;
+        try {
+            await api.post("/admin/inventory/sync");
+            setSyncMessage("Inventory reset - Shopify webhooks will resync automatically");
+            setTimeout(() => setSyncMessage(""), 5000);
+
+        } catch (error) {
+            console.error("Failed to reset inventory:", error);
+
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm("Delete this user and all their data? This cannot be undone.")) return;
+        try {
+            await api.delete(`/admin/users/${userId}`);
+            setUsers((user) => user.filter((u) => u.id !== userId));
+
+        } catch(error) {
+            console.error("Failed to delete user:", error);
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+                <p className="text-zinc-500 text-sm md:text-base">Loading admin data...</p>
+            </div>
+        )
+    }
+
+    const statCards = [
+        { label: "Total users", value: stats?.totalUsers ?? 0, blue: true },
+        { label: "Total alerts", value: stats?.totalAlerts ?? 0 },
+        { label: "Active alerts", value: stats?.activeAlerts ?? 0 },
+        { label: "Inventory in stock", value: stats?.totalInventory ?? 0, green: true },
+        { label: "Notifications sent", value: stats?.totalNotifications ?? 0 },
+        { label: "Alert clicks", value: stats?.totalClicks ?? 0 },
+        { label: "Purchases", value: stats?.totalPurchases ?? 0 },
+        { label: "Purchases via app", value: stats?.purchasesViaApp ?? 0, green: true },
+  ];
 
     return (
         <div className="min-h-screen bg-zinc-950 text-white">
@@ -51,12 +106,19 @@ export default function Admin() {
 
             <div className="px-6 md:px-10 pb-10 max-w-6xl mx-auto">
 
+                {/* Sync Message */}
+                {syncMessage && (
+                    <div className="bg-green-950 border border-green-900 text-green-400 text-sm md:text-base rounded-xl px-4 py-3 mb-6 mt-3">
+                        {syncMessage}
+                    </div>
+                )}
+
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                    {stats.map((stat) => (
+                    {statCards.map((stat) => (
                         <div key={stat.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
                             <p className="text-xs md:text-base text-zinc-500 mb-1 md:mb-2">{stat.label}</p>
-                            <p className={`text-2xl md:text-3xl font-medium ${stat.green ? "text-green-400" : "text-white"}`}>{stat.value}</p>
+                            <p className={`text-2xl md:text-3xl font-medium ${stat.blue ? "text-blue-500" : stat.green ? "text-green-400" : "text-white"}`}>{stat.value}</p>
                         </div>
                     ))}
                 </div>
@@ -69,23 +131,30 @@ export default function Admin() {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2.5">
                                 <IoPeopleOutline className="text-zinc-400 text-xl md:text-2xl" />
-                                <p className="text-base md:text-lg font-medium">Recent users</p>
-                            </div>
-                            <button className="text-xs md:text-lg cursor-pointer bg-zinc-800 px-3 py-1.5 rounded-lg hover:bg-zinc-700 transition-colors">View all</button>
+                                <p className="text-base md:text-lg font-medium"> Users ({users.length})</p>
+                            </div>                        
                         </div>
                         <div className="flex flex-col">
-                            {recentUsers.map((user) => (
-                                <div key={user.email} className="flex items-center gap-3 py-3 border-b border-zinc-800 last:border-0">
+                            {users.map((user, i) => (
+                                <div key={user.id} className={`flex items-center gap-3 py-3 ${i !== users.length - 1 ? "border-b border-zinc-800" : ""}`}>
                                     <div className="w-9 h-9 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-blue-700 text-xs md:text-base font-medium shrink-0">
-                                        {user.name[0]}
+                                        {user.full_name?.[0]?.toUpperCase() || "?"}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm md:text-lg font-medium text-zinc-200 truncate">{user.name}</p>
+                                        <p className="text-sm md:text-lg font-medium text-zinc-200 truncate">{user.full_name}</p>
                                         <p className="text-xs md:text-base text-zinc-500 truncate">{user.email}</p>
                                     </div>
                                     <span className={`text-xs md:text-base px-2.5 py-1 rounded-full shrink-0 ${user.role === "admin" ? "bg-blue-950 text-blue-300" : "bg-zinc-800 text-zinc-400"}`}>
                                         {user.role}
                                     </span>
+                                    {user.role !== "admin" && (
+                                        <button
+                                            onClick={() => handleDeleteUser(user.id)}
+                                            className="text-red-400 hover:text-red-300 transition-colors shrink-0 cursor-pointer"
+                                        >
+                                            <IoTrashOutline size={20} />
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -96,22 +165,19 @@ export default function Admin() {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2.5">
                                 <IoAlertCircleOutline className="text-zinc-400 text-xl md:text-2xl" />
-                                <p className="text-base font-medium">Recent alerts</p>
+                                <p className="text-base font-medium">Alerts ({alerts.length})</p>
                             </div>
-                            <button className="text-xs cursor-pointer md:text-lg bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg hover:bg-zinc-700 transition-colors">
-                                View all
-                            </button>
                         </div>
                         <div className="flex flex-col">
-                            {recentAlerts.map((alert, i) => (
-                                <div key={i} className="flex items-start justify-between gap-3 py-3 border-b border-zinc-800 last:border-0">
+                            {alerts.map((alert, i) => (
+                                <div key={alert.id} className={`flex items-center justify-between gap-3 py-3 ${i !== alerts.length - 1 ? "border-b border-zinc-800" : ""}`}>
                                     <div className="min-w-0">
-                                        <p className="text-sm md:text-lg  mb-1 font-medium text-zinc-200 truncate">{alert.shoe}</p>
-                                        <p className="text-xs md:text-sm mb-1 text-zinc-500">{alert.meta}</p>
-                                        <p className="text-xs md:text-base text-blue-400">{alert.user}</p>
+                                        <p className="text-sm md:text-lg  mb-1 font-medium text-zinc-200 truncate">{alert.shoe_name}</p>
+                                        <p className="text-xs md:text-sm mb-1 text-zinc-500">{alert.size}</p>
+                                        <p className="text-sm md:text-base text-blue-400">{alert.User?.email}</p>
                                     </div>
-                                    <span className="text-xs md:text-base bg-blue-950 text-blue-300 px-2.5 py-1 rounded-full shrink-0">
-                                        Active
+                                    <span className={`text-sm md:text-base px-2 py-0.5 rounded-full shrink-0 ${alert.active ? "bg-blue-950 text-blue-300" : "bg-zinc-800 text-zinc-400"}`}>
+                                        {alert.active ? "Active" : "Paused"}
                                     </span>
                                 </div>
                             ))}
@@ -124,13 +190,22 @@ export default function Admin() {
                     <p className="text-base md:text-xl font-medium mb-2">Inventory management</p>
                     <p className="text-sm md:text-base text-zinc-500 mb-4 leading-relaxed">Manually reset inventory or trigger a resync from Shopify. Webhooks will repopulate automatically after a reset.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <button className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 transition-colors">
+                        <button 
+                            className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 transition-colors"
+                            onClick={() => navigate("/dashboard")}
+                        >
                             <IoSearchOutline size={16} /> View inventory
                         </button>
-                        <button className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-zinc-800 text-zinc-300 px-4 py-2.5 rounded-lg hover:bg-zinc-700 transition-colors">
+                        <button 
+                            className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-zinc-800 text-zinc-300 px-4 py-2.5 rounded-lg hover:bg-zinc-700 transition-colors"
+                            onClick={handleResetInventory}
+                        >
                             <IoRefreshOutline size={16} /> Reset inventory
                         </button>
-                        <button className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-red-950 text-red-400 px-4 py-2.5 rounded-lg hover:bg-red-900 transition-colors">
+                        <button 
+                            className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-red-950 text-red-400 px-4 py-2.5 rounded-lg hover:bg-red-900 transition-colors"
+                            
+                        >
                             <IoTrashOutline size={16} /> Clear all alerts
                         </button>
                     </div>
