@@ -14,6 +14,7 @@ const getAuthUrl = (req, res) => {
         audience: "gateway.stockx.com"
     });
 
+    console.log("redirect_uri:", `${process.env.BACKEND_URL}/api/stockx/callback`);
     res.redirect(`https://accounts.stockx.com/authorize?${params.toString()}`);
 };
 
