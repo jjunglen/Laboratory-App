@@ -8,7 +8,7 @@ const fetch = require("node-fetch");
 const getAuthUrl = (req, res) => {
     const params = new URLSearchParams({
         client_id: process.env.STOCKX_CLIENT_ID,
-        redirect_url: `${process.env.BACKEND_URL}/api/stockx/callback`,
+        redirect_uri: `${process.env.BACKEND_URL}/api/stockx/callback`,
         response_type: "code",
         scope: "offline_access",
         audience: "gateway.stockx.com"
