@@ -21,7 +21,7 @@ const getAccessToken = async () => {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({
-            grant_type: "client_credentials",
+            grant_type: "refresh_token",
             client_id: process.env.STOCKX_CLIENT_ID,
             client_secret: process.env.STOCKX_CLIENT_SECRET,
             refresh_token: process.env.STOCKX_REFRESH_TOKEN,
