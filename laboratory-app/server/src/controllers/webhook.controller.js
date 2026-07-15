@@ -76,4 +76,51 @@ const handleProductDelete = async (req, res) => {
   }
 };
 
-module.exports = { handleProductCreate, handleProductDelete };
+const handleProductUpdate = async (req, res) => {
+  try {
+    const data = JSON.parse(req.body);
+    const variants = data.variants || [];
+    const imageUrl = data.images?.[0]?.src || null;
+
+    for (const variant of variants) {
+      const { size, condition, boxCondition } = parseVariantTitle(
+        variant.title,
+      );
+
+      await Inventory.upsert({
+        shopify_product_id: String(data.id),
+        shopify_variant_id: String(variant.id),
+        shoe_name: data.title,
+        sku: variant.sku || null,
+        size: size,
+        condition: condition,
+        box_status: boxCondition,
+        price: parseFloat(variant.price) || null,
+        available: variant.inventory_quantity || 0,
+        shopify_url: `https://thelabdtx.com/products/${data.handle}`,
+        image_url: imageUrl,
+        last_synced_at: new Date(),
+      });
+    }
+
+    res.status(200).json({ received: true });
+
+    for (const variant of variants) {
+      if (!variant.inventory_quantity || variant.inventory_quantity < 1)
+        continue;
+
+      const inventoryItem = await Inventory.findOne({
+        where: { shopify_variant_id: String(variant.id) },
+      });
+
+      if (inventoryItem) {
+        await checkAlertsForInventory(inventoryItem);
+      }
+    }
+  } catch (error) {
+    console.error("Product update webhook error:", error.message);
+  }
+};
+
+
+module.exports = { handleProductCreate, handleProductDelete, handleProductUpdate };

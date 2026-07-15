@@ -21,14 +21,17 @@ const getAccessToken = async () => {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({
+            grant_type: "client_credentials",
             client_id: process.env.STOCKX_CLIENT_ID,
             client_secret: process.env.STOCKX_CLIENT_SECRET,
+            refresh_token: process.env.STOCKX_REFRESH_TOKEN,
             audience: "gateway.stockx.com",
-            grant_type: "client_credentials",
+
         }),
     });
 
     const data = await response.json();
+    console.log("StockX token response:", data);
 
     if (!data.access_token) {
         throw new Error("Failed to get Stockx access token");
@@ -64,6 +67,7 @@ const searchStockX = async (query, pageSize = 10) => {
     });
 
     const data = await response.json();
+    console.log("StockX token response:", data);
 
     if (!response.ok) {
         throw new Error(data.message || "Stockx search failed");

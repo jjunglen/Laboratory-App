@@ -70,6 +70,7 @@ export default function Dashboard() {
     const fetchAlerts = async () => {
       try {
         const res = await api.get("/alerts");
+        console.log("alerts response:", res.data);
         setAlerts(res.data.data.alerts || []);
       } catch (err) {
         console.error("Failed to fetch alerts:", err);
