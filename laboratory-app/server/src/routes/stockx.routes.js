@@ -16,4 +16,5 @@ router.get("/auth", getAuthUrl);
 // GET /api/stockx/callback - StockX redirects here after login
 router.get("/callback", handleOAuthCallback);
 
+
 module.exports = router;

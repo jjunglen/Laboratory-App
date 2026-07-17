@@ -11,40 +11,44 @@ let tokenExpiresAt = null;
 
 // Stockx uses OAuth to generate a Bearer token
 const getAccessToken = async () => {
-    if (cachedToken && tokenExpiresAt && Date.now() < tokenExpiresAt) {
-        return cachedToken;
-
-    }
-
-    // request a new token from Stockx
-    const response = await fetch("https://accounts.stockx.com/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({
-            grant_type: "refresh_token",
-            client_id: process.env.STOCKX_CLIENT_ID,
-            client_secret: process.env.STOCKX_CLIENT_SECRET,
-            refresh_token: process.env.STOCKX_REFRESH_TOKEN,
-            audience: "gateway.stockx.com",
-
-        }),
-    });
-
-    const data = await response.json();
-    console.log("StockX token response:", data);
-
-    if (!data.access_token) {
-        throw new Error("Failed to get Stockx access token");
-
-    }
-
-    // Cache the token and set expiry to 55 minutes from now
-    // Stockx token lasts 1 hour but make it refresh at 55 minutes
-    cachedToken = data.access_token;
-    tokenExpiresAt = Date.now() + 55 * 60 * 1000;
-
+  if (cachedToken && tokenExpiresAt && Date.now() < tokenExpiresAt) {
     return cachedToken;
+  }
 
+  // request a new token from Stockx
+  const response = await fetch("https://accounts.stockx.com/oauth/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "refresh_token",
+      client_id: process.env.STOCKX_CLIENT_ID,
+      client_secret: process.env.STOCKX_CLIENT_SECRET,
+      refresh_token: process.env.STOCKX_REFRESH_TOKEN,
+      audience: "gateway.stockx.com",
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!data.access_token) {
+    throw new Error("Failed to get Stockx access token");
+  }
+
+  // Cache the token and set expiry to 55 minutes from now
+  // Stockx token lasts 1 hour but make it refresh at 55 minutes
+  cachedToken = data.access_token;
+  tokenExpiresAt = Date.now() + 55 * 60 * 1000;
+
+  return cachedToken;
+};
+
+// Convert urlKey to title case image name
+// air-jordan-4-retro-bred-reimagined -> Air-Jordan-4-Retro-Bred-Reimagined
+const urlKeyToImageName = (urlKey) => {
+    return urlKey
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join("-");
 };
 
 // Search catalog
@@ -52,31 +56,34 @@ const getAccessToken = async () => {
 // searches the stockx catalog by name or sku
 // returns an array of matching product with name, image, colorway, sku, and product id
 const searchStockX = async (query, pageSize = 10) => {
-    // Get a valid access token
-    const token = await getAccessToken();
+  // Get a valid access token
+  const token = await getAccessToken();
 
-    // Hit the stockx catalog search endpoint
-    const response = await fetch(`${STOCKX_BASE_URL}/catalog/search?query=${encodeURIComponent(query)}&pageNumber=1&pageSize=${pageSize}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "x-api-key": process.env.STOCKX_API_KEY,
-            "Content-Type": "application/json",
+  // Hit the stockx catalog search endpoint
+  const response = await fetch(
+    `${STOCKX_BASE_URL}/catalog/search?query=${encodeURIComponent(query)}&pageNumber=1&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "x-api-key": process.env.STOCKX_API_KEY,
+        "Content-Type": "application/json",
+      },
+    },
+  );
 
-        }
-    });
+  const data = await response.json();
+  console.log("StockX token response:", data);
 
-    const data = await response.json();
-    console.log("StockX token response:", data);
+  if (!response.ok) {
+    throw new Error(data.message || "Stockx search failed");
+  }
 
-    if (!response.ok) {
-        throw new Error(data.message || "Stockx search failed");
-
-    }
-
-    return data.products || [];
-
+  // In searchStockX, update the map:
+  return (data.products || []).map((product) => ({
+    ...product,
+    image_url: `https://images.stockx.com/images/${urlKeyToImageName(product.urlKey)}-Product.jpg?fit=fill&bg=FFFFFF&w=400&h=300&fm=webp&auto=compress&q=90`,
+  }));
 };
 
 module.exports = { searchStockX };
-

@@ -6,50 +6,49 @@ const fetch = require("node-fetch");
 // GET /api/stockx/auth
 // Redirects to Stockx login page
 const getAuthUrl = (req, res) => {
-    const params = new URLSearchParams({
-        client_id: process.env.STOCKX_CLIENT_ID,
-        redirect_uri: `${process.env.BACKEND_URL}/api/stockx/callback`,
-        response_type: "code",
-        scope: "offline_access",
-        audience: "gateway.stockx.com"
-    });
+  const params = new URLSearchParams({
+    client_id: process.env.STOCKX_CLIENT_ID,
+    redirect_uri: `${process.env.BACKEND_URL}/api/stockx/callback`,
+    response_type: "code",
+    scope: "offline_access",
+    audience: "gateway.stockx.com",
+  });
 
-    console.log("redirect_uri:", `${process.env.BACKEND_URL}/api/stockx/callback`);
-    res.redirect(`https://accounts.stockx.com/authorize?${params.toString()}`);
+  console.log(
+    "redirect_uri:",
+    `${process.env.BACKEND_URL}/api/stockx/callback`,
+  );
+  res.redirect(`https://accounts.stockx.com/authorize?${params.toString()}`);
 };
 
 // HANDLE OAUTH CALLBACK
 // GET /api/stockx/callback
 // StockX redirects here after loginwith an auth code
 const handleOAuthCallback = async (req, res) => {
-    const { code } = req.query;
+  const { code } = req.query;
 
-    if (!code) {
-        return res.status(400).send("<h2>Error - missing code from StockX</h2>");
-    }
+  if (!code) {
+    return res.status(400).send("<h2>Error - missing code from StockX</h2>");
+  }
 
-    try {
+  try {
+    const response = await fetch("https://accounts.stockx.com/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        client_id: process.env.STOCKX_CLIENT_ID,
+        client_secret: process.env.STOCKX_CLIENT_SECRET,
+        code,
+        redirect_uri: `${process.env.BACKEND_URL}/api/stockx/callback`,
+      }),
+    });
 
-        const response = await fetch(
-            "https://accounts.stockx.com/oauth/token",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                grant_type: "authorization_code",
-                client_id: process.env.STOCKX_CLIENT_ID,
-                client_secret: process.env.STOCKX_CLIENT_SECRET,
-                code,
-                redirect_uri: `${process.env.BACKEND_URL}/api/stockx/callback`,
-                }),
-            },
-        );
+    const data = await response.json();
+    console.log("StockX OAuth response:", data);
 
-        const data = await response.json();
-        console.log("StockX OAuth response:", data);
-
-        if (data.refresh_token) {
-            res.send(`
+    if (data.refresh_token) {
+      res.send(`
             <html>
             <body style="font-family: monospace; padding: 40px; background: #0a0a0a; color: white;">
                 <h2 style="color: #3b82f6;">StockX OAuth Success</h2>
@@ -64,8 +63,8 @@ const handleOAuthCallback = async (req, res) => {
             </body>
             </html>
             `);
-        } else {
-            res.send(`
+    } else {
+      res.send(`
             <html>
             <body style="font-family: monospace; padding: 40px; background: #0a0a0a; color: white;">
                 <h2 style="color: #ef4444;">StockX OAuth Failed</h2>
@@ -73,36 +72,36 @@ const handleOAuthCallback = async (req, res) => {
             </body>
             </html>
             `);
-        }
-        
-    } catch (error) {
-        console.error("StockX OAuth callback error:", error.message);
-        res.status(500).send(`<h2>Server error: ${error.message}`)
     }
+  } catch (error) {
+    console.error("StockX OAuth callback error:", error.message);
+    res.status(500).send(`<h2>Server error: ${error.message}`);
+  }
 };
 
 // SEARCH Catalog
 // GET api/stockx/search?q=jordan+4+union
 // Searches stockx catalog and returns matching shoes
 const searchCatalog = async (req, res) => {
-    try {
-        const { q } = req.query;
+  try {
+    const { q } = req.query;
 
-        // Search query is required
-        if (!q) {
-            return badRequest(res, "Missing search query");
-
-        }
-
-        const results = await searchStockX(q);
-
-        return success(res, results);
-
-    } catch(error) {
-        console.error("Stockx search error:", error.message);
-        return serverError(res);
-
+    // Search query is required
+    if (!q) {
+      return badRequest(res, "Missing search query");
     }
+
+    const results = await searchStockX(q);
+
+    return success(res, results);
+  } catch (error) {
+    console.error("Stockx search error:", error.message);
+    return serverError(res);
+  }
 };
 
-module.exports = { searchCatalog, handleOAuthCallback, getAuthUrl };
+module.exports = {
+  searchCatalog,
+  handleOAuthCallback,
+  getAuthUrl,
+};

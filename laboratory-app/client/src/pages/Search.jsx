@@ -42,15 +42,10 @@ export default function Search() {
         setSearching(true);
         try {
             const res = await api.get(
-            `/inventory/search?q=${encodeURIComponent(query)}`,
+              `/stockx/search?q=${encodeURIComponent(query)}`,
             );
-            const seen = new Set();
-            const unique = (res.data.data || []).filter((item) => {
-            if (seen.has(item.shoe_name)) return false;
-            seen.add(item.shoe_name);
-            return true;
-            });
-            setResults(unique);
+            setResults(res.data.data || []);
+
         } catch (error) {
             console.error("Search failed", error);
         } finally {
@@ -69,14 +64,15 @@ export default function Search() {
         
         try {
             await api.post("/alerts", {
-                shoe_name: selectedShoe.shoe_name,
-                sku: selectedShoe.sku,
+                shoe_name: selectedShoe.title,
+                sku: selectedShoe.styleId,
                 size,
                 condition_preference: condition,
                 box_preference: boxPref,
                 max_price: maxPrice ? parseFloat(maxPrice) : null,
                 notify_email: emailNotif,
                 notify_inapp: inAppNotif,
+                stockx_product_id: selectedShoe.productId,
 
             });
 
@@ -90,7 +86,7 @@ export default function Search() {
             setResults([]);
 
         } catch(error) {
-            setError(err.response?.data?.error || "Failed to create alert. Please try again.");
+            setError(error.response?.data?.error || "Failed to create alert. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -186,45 +182,58 @@ export default function Search() {
               <div className="flex flex-col gap-2">
                 {results.map((shoe) => (
                   <div
-                    key={shoe.id}
+                    key={shoe.productId}
                     onClick={() => {
                       setSelectedShoe(shoe);
                       setSuccess(false);
                       setError("");
                       if (user?.sizes?.length > 0 && !size) {
-                        setSize(user.size[0]);
+                        setSize(user.sizes[0]);
                       }
                     }}
                     className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer transition-colors ${
-                      selectedShoe?.sku === shoe.sku
+                      selectedShoe?.productId === shoe.productId
                         ? "border-blue-500 bg-zinc-900"
                         : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
                     }`}
                   >
                     {shoe.image_url ? (
                       <img
-                        src={
-                          shoe.image_url.includes("?")
-                            ? `${shoe.image_url}&width=200`
-                            : `${shoe.image_url}?width=200`
-                        }
-                        alt={shoe.shoe_name}
-                        className="w-17 h-17 rounded-lg object-contain shrink-0"
+                        src={shoe.image_url}
+                        alt={shoe.title}
+                        className="w-20 h-20 rounded-lg object-contain bg-white shrink-0"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
+                        }}
                       />
-                    ) : (
-                      <div className="w-17 h-17 rounded-lg bg-white shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-zinc-200 truncate">
-                            {shoe.shoe_name}
-                        </p>
-                        <p className="text-xs text-zinc-500">{shoe.sku}</p>
+                    ) : null}
+                    <div
+                      className="w-20 h-20 rounded-lg bg-zinc-800 shrink-0 items-center justify-center"
+                      style={{ display: shoe.image_url ? "none" : "flex" }}
+                    >
+                      <span className="text-zinc-600 text-xs md:text-base text-center px-1">
+                        {shoe.brand}
+                      </span>
                     </div>
-                    {selectedShoe?.id === shoe.id && (
-                        <IoCheckmarkCircle
-                            className="text-blue-500 shrink-0"
-                            size={22}
-                        />
+                    <div className="flex-1 min-w-0 h-20 md:h-auto flex flex-col justify-center">
+                      <p className="text-sm md:text-base mb-1 font-medium text-zinc-200 line-clamp-2 leading-tight">
+                        {shoe.title}
+                      </p>
+                      <p className="text-xs md:text-sm mb-2 text-zinc-500">
+                        {shoe.styleId}
+                      </p>
+                      {shoe.productAttributes?.colorway && (
+                        <p className="text-xs text-zinc-600 truncate">
+                          {shoe.productAttributes.colorway}
+                        </p>
+                      )}
+                    </div>
+                    {selectedShoe?.productId === shoe.productId && (
+                      <IoCheckmarkCircle
+                        className="text-blue-500 shrink-0"
+                        size={22}
+                      />
                     )}
                   </div>
                 ))}
@@ -232,16 +241,22 @@ export default function Search() {
             )}
 
             {!searching && query && results.length === 0 && (
-                <div className="flex flex-col items-center justify-center text-center py-16">
-                    <p className="text-zinc-600 text-sm md:text-base">No results for "{query}"</p>
-                    <p className="text-zinc-600 text-xs md:text-sm mt-2">Try a different name or SKU</p>
-                </div>
+              <div className="flex flex-col items-center justify-center text-center py-16">
+                <p className="text-zinc-600 text-sm md:text-base">
+                  No results for "{query}"
+                </p>
+                <p className="text-zinc-600 text-xs md:text-sm mt-2">
+                  Try a different name or SKU
+                </p>
+              </div>
             )}
 
             {!query && (
-                <div className="flex flex-col items-center justify-center text-center py-16 md:py-24">
-                    <p className="text-zinc-600 text-sm md:text-base leading-relaxed max-w-sm">Searching a shoe to set up an alert for when it hits our store</p>
-                </div>
+              <div className="flex flex-col items-center justify-center text-center py-16 md:py-24">
+                <p className="text-zinc-600 text-sm md:text-base leading-relaxed max-w-sm">
+                  Searching a shoe to set up an alert for when it hits our store
+                </p>
+              </div>
             )}
           </div>
 
@@ -249,25 +264,42 @@ export default function Search() {
           <div className="w-full border-t border-t-zinc-800 md:border-t-0 md:w-1/2 md:pl-8 mt-8 md:mt-0">
             {selectedShoe ? (
               <>
-                <div className="bg-zinc-900 mt-6 md:mt-0 border border-zinc-800 rounded-xl mb-6">
-                    {selectedShoe.image_url ? (
-                        <img 
-                            src={selectedShoe.image_url.includes("?") ? `${selectedShoe.image_url}&width=400`
-                            : `${selectedShoe.image_url}?width=400`}
-                            alt={selectedShoe.shoe_name} 
-                            className="w-full h-40 md:48 object-contain bg-white rounded-t-lg"
-                        /> ) : (
-                            <div className="h-40 md:h-48 rounded-t-xl bg-zinc-100" />
-                        )
-                    }
-                    <div className="p-4">
-                        <p className="text-base md:text-xl mb-1 md:mb-2 font-medium text-zinc-200">
-                        {selectedShoe.shoe_name}
-                        </p>
-                        <p className="text-sm md:text-base text-zinc-500">
-                        {selectedShoe.sku}
-                        </p>
-                    </div>
+                <div className="bg-zinc-900 mt-6 md:mt-0 border border-zinc-800 rounded-xl overflow-hidden mb-6">
+                  {selectedShoe.image_url ? (
+                    <img
+                      src={selectedShoe.image_url}
+                      alt={selectedShoe.title}
+                      className="w-full h-44 md:h-52 object-contain bg-white"
+                      onError={(event) => {
+                        event.target.style.display = "none";
+                        event.target.nextSibling.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="w-full h-44 md:h-52 bg-zinc-800 items-center justify-center"
+                    style={{
+                      display: selectedShoe.image_url ? "none" : "flex",
+                    }}
+                  >
+                    <span className="text-zinc-500 text-sm">
+                      {selectedShoe.brand}
+                    </span>
+                  </div>
+                  {/* Info always shows below image */}
+                  <div className="p-4">
+                    <p className="text-sm md:text-base mb-1 font-medium text-zinc-200">
+                      {selectedShoe.title}
+                    </p>
+                    <p className="text-xs md:text-sm mb-2 text-zinc-500">
+                      {selectedShoe.styleId}
+                    </p>
+                    {selectedShoe.productAttributes?.colorway && (
+                      <p className="text-xs text-zinc-600">
+                        {selectedShoe.productAttributes.colorway}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <p className="md:text-base text-sm font-medium text-white mb-4">
@@ -286,7 +318,9 @@ export default function Search() {
                     >
                       <option value="">Select your size</option>
                       {sizeOptions.map((size) => (
-                        <option value={size} key={size}>{size}</option>
+                        <option value={size} key={size}>
+                          {size}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -314,9 +348,9 @@ export default function Search() {
                       onChange={(event) => setCondition(event.target.value)}
                       className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm md:text-base text-zinc-200 outline-none focus:border-blue-500 transition-colors"
                     >
-                      <option>Either</option>
-                      <option>Brand New</option>
-                      <option>Pre-Owned</option>
+                      <option value="either">Either</option>
+                      <option value="brand_new">Brand New</option>
+                      <option value="pre_owned">Pre-Owned</option>
                     </select>
                   </div>
                   <div>
@@ -328,8 +362,9 @@ export default function Search() {
                       onChange={(event) => setBoxPref(event.target.value)}
                       className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm md:text-base text-zinc-200 outline-none focus:border-blue-500 transition-colors"
                     >
-                      <option>No preference</option>
-                      <option>Original box only</option>
+                      <option value="no_preference">No preference</option>
+                      <option value="original_box">Original box only</option>
+                      <option value="no_box">No box is fine</option>
                     </select>
                   </div>
 
