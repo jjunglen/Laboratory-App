@@ -154,69 +154,6 @@ export default function Dashboard() {
       </div>
 
       <div className="px-6 md:px-10 py-8 max-w-6xl mx-auto">
-
-        {/* YOUR ALERTS TAB */}
-        {tab === "alerts" && (
-          <>
-            <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-full bg-blue-800">
-                  <IoBagCheckOutline className="text-blue-300" size={22} />
-                </div>
-                <div>
-                  <p className="text-base md:text-lg font-medium text-white">
-                    <span className="text-blue-500 text-xl md:text-2xl">{alerts.length}</span> shoes tracked
-                  </p>
-                  <p className="text-xs md:text-sm text-zinc-500">We'll notify you the second they drop</p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate("/search")}
-                className="flex items-center gap-2 bg-blue-950 text-blue-300 text-xs md:text-sm px-4 py-2.5 rounded-lg hover:bg-blue-900 transition-colors cursor-pointer"
-              >
-                <IoAddOutline size={16} /> Track a new shoe
-              </button>
-            </div>
-
-            {loadingAlerts ? (
-              <p className="text-zinc-500 text-sm md:text-base">Loading your alerts...</p>
-            ) : alerts.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-zinc-500 text-sm md:text-base mb-4">No alerts yet</p>
-                <button
-                  onClick={() => navigate("/search")}
-                  className="bg-blue-500 text-white text-xs md:text-sm font-medium px-5 py-2.5 rounded-lg cursor-pointer"
-                >
-                  Track your first shoe
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {alerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4"
-                  >
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-zinc-100 shrink-0" />
-                    <div>
-                      <p className="text-sm md:text-base font-medium text-zinc-200 mb-1">{alert.shoe_name}</p>
-                      <p className="text-xs md:text-sm text-zinc-500">{alert.size}</p>
-                      {alert.max_price && (
-                        <p className="text-xs md:text-sm text-zinc-600">
-                          Max ${parseFloat(alert.max_price).toFixed(0)}
-                        </p>
-                      )}
-                      <span className="inline-block mt-1 text-xs md:text-sm bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
-                        {alert.active ? "Active" : "Paused"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
         {/* IN STOCK TAB */}
         {tab === "instock" && (
           <>
@@ -226,16 +163,23 @@ export default function Dashboard() {
                   <IoGridOutline size={22} className="text-blue-300" />
                 </div>
                 <div>
-                  <p className="text-base md:text-lg font-medium text-white">In stock in your sizes</p>
+                  <p className="text-base md:text-lg font-medium text-white">
+                    In stock in your sizes
+                  </p>
                   <div className="flex gap-2 mt-1 flex-wrap">
                     {mySizes.length > 0 ? (
                       mySizes.map((size) => (
-                        <span key={size} className="text-xs md:text-sm bg-zinc-900 border border-zinc-800 text-zinc-400 py-1 px-3 rounded-full">
+                        <span
+                          key={size}
+                          className="text-xs md:text-sm bg-zinc-900 border border-zinc-800 text-zinc-400 py-1 px-3 rounded-full"
+                        >
                           {size}
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs md:text-sm text-zinc-500">No sizes set</span>
+                      <span className="text-xs md:text-sm text-zinc-500">
+                        No sizes set
+                      </span>
                     )}
                   </div>
                 </div>
@@ -249,16 +193,22 @@ export default function Dashboard() {
             </div>
 
             {loadingInventory ? (
-              <p className="text-zinc-500 text-sm md:text-base">Loading inventory...</p>
+              <p className="text-zinc-500 text-sm md:text-base">
+                Loading inventory...
+              </p>
             ) : inStockItems.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-zinc-500 text-sm md:text-base mb-2">Nothing in stock in your sizes right now</p>
-                <p className="text-zinc-600 text-xs md:text-sm">Track a specific shoe to get notified when it drops</p>
+                <p className="text-zinc-500 text-sm md:text-base mb-2">
+                  Nothing in stock in your sizes right now
+                </p>
+                <p className="text-zinc-600 text-xs md:text-sm">
+                  Track a specific shoe to get notified when it drops
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {inStockItems.map((shoe) => (
-                <a 
+                  <a
                     key={shoe.id}
                     href={shoe.shopify_url}
                     target="_blank"
@@ -268,9 +218,11 @@ export default function Dashboard() {
                     <div className="relative w-full h-44 md:h-52 bg-white">
                       {shoe.image_url ? (
                         <img
-                          src={shoe.image_url.includes('?')
-                            ? `${shoe.image_url}&width=400`
-                            : `${shoe.image_url}?width=400`}
+                          src={
+                            shoe.image_url.includes("?")
+                              ? `${shoe.image_url}&width=400`
+                              : `${shoe.image_url}?width=400`
+                          }
                           alt={shoe.shoe_name}
                           className="w-full h-full object-contain p-2"
                         />
@@ -278,11 +230,13 @@ export default function Dashboard() {
                         <div className="w-full h-full bg-zinc-200" />
                       )}
                       {conditionLabel(shoe.condition) && (
-                        <span className={`absolute top-2 left-2 text-[10px] text-xs md:text-sm font-medium px-2 py-0.5 rounded-full ${
-                          shoe.condition === "brand_new"
-                            ? "bg-green-500 text-white"
-                            : "bg-zinc-700 text-zinc-200"
-                        }`}>
+                        <span
+                          className={`absolute top-2 left-2 text-[10px] text-xs md:text-sm font-medium px-2 py-0.5 rounded-full ${
+                            shoe.condition === "brand_new"
+                              ? "bg-green-500 text-white"
+                              : "bg-zinc-700 text-zinc-200"
+                          }`}
+                        >
                           {conditionLabel(shoe.condition)}
                         </span>
                       )}
@@ -319,8 +273,12 @@ export default function Dashboard() {
                   <IoSparklesOutline size={22} className="text-blue-300" />
                 </div>
                 <div>
-                  <p className="text-base md:text-lg font-medium text-white">New arrivals</p>
-                  <p className="text-xs md:text-sm text-zinc-500">Newest listings across all sizes</p>
+                  <p className="text-base md:text-lg font-medium text-white">
+                    New arrivals
+                  </p>
+                  <p className="text-xs md:text-sm text-zinc-500">
+                    Newest listings across all sizes
+                  </p>
                 </div>
               </div>
               <button
@@ -336,7 +294,7 @@ export default function Dashboard() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {newArrivals.map((shoe) => (
-                <a 
+                  <a
                     key={shoe.id}
                     href={shoe.shopify_url}
                     target="_blank"
@@ -346,9 +304,11 @@ export default function Dashboard() {
                     <div className="relative w-full h-44 md:h-52 bg-white">
                       {shoe.image_url ? (
                         <img
-                          src={shoe.image_url.includes('?')
-                            ? `${shoe.image_url}&width=400`
-                            : `${shoe.image_url}?width=400`}
+                          src={
+                            shoe.image_url.includes("?")
+                              ? `${shoe.image_url}&width=400`
+                              : `${shoe.image_url}?width=400`
+                          }
                           alt={shoe.shoe_name}
                           className="w-full h-full object-contain p-2"
                         />
@@ -390,7 +350,9 @@ export default function Dashboard() {
                 <IoSearchOutline className="text-zinc-400" size={22} />
               </div>
               <div>
-                <p className="text-sm md:text-base font-medium text-white">Browse inventory</p>
+                <p className="text-sm md:text-base font-medium text-white">
+                  Browse inventory
+                </p>
                 <p className="text-xs md:text-sm text-zinc-500">
                   {shoeInventory.length} shoes in stock right now
                 </p>
@@ -399,7 +361,10 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-3 mb-6 flex-wrap">
               <div className="relative flex-1 min-w-[220px]">
-                <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <IoSearchOutline
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+                  size={18}
+                />
                 <input
                   type="text"
                   value={browseQuery}
@@ -415,21 +380,30 @@ export default function Dashboard() {
                   className="appearance-none text-xs md:text-sm border border-zinc-800 bg-zinc-900 text-zinc-400 pl-4 pr-10 py-3 rounded-lg focus:border-blue-500 outline-none transition-colors cursor-pointer"
                 >
                   {availableSizes.map((size) => (
-                    <option key={size} value={size}>{size}</option>
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
                   ))}
                 </select>
-                <IoChevronDownOutline className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                <IoChevronDownOutline
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
+                  size={16}
+                />
               </div>
             </div>
 
-            <p className="text-xs md:text-sm text-zinc-500 mb-4">{browseFiltered.length} results</p>
+            <p className="text-xs md:text-sm text-zinc-500 mb-4">
+              {browseFiltered.length} results
+            </p>
 
             {loadingInventory ? (
-              <p className="text-zinc-500 text-sm md:text-base">Loading inventory...</p>
+              <p className="text-zinc-500 text-sm md:text-base">
+                Loading inventory...
+              </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {browseFiltered.map((shoe) => (
-                <a 
+                  <a
                     key={shoe.id}
                     href={shoe.shopify_url}
                     target="_blank"
@@ -439,9 +413,11 @@ export default function Dashboard() {
                     <div className="relative w-full h-44 md:h-52 bg-white">
                       {shoe.image_url ? (
                         <img
-                          src={shoe.image_url.includes('?')
-                            ? `${shoe.image_url}&width=400`
-                            : `${shoe.image_url}?width=400`}
+                          src={
+                            shoe.image_url.includes("?")
+                              ? `${shoe.image_url}&width=400`
+                              : `${shoe.image_url}?width=400`
+                          }
                           alt={shoe.shoe_name}
                           className="w-full h-full object-contain p-2"
                         />
@@ -449,19 +425,23 @@ export default function Dashboard() {
                         <div className="w-full h-full bg-zinc-200" />
                       )}
                       {conditionLabel(shoe.condition) && (
-                        <span className={`absolute top-2 left-2 text-xs md:text-sm font-medium px-2 py-0.5 rounded-full ${
-                          shoe.condition === "brand_new"
-                            ? "bg-green-500 text-white"
-                            : "bg-zinc-700 text-zinc-200"
-                        }`}>
+                        <span
+                          className={`absolute top-2 left-2 text-xs md:text-sm font-medium px-2 py-0.5 rounded-full ${
+                            shoe.condition === "brand_new"
+                              ? "bg-green-500 text-white"
+                              : "bg-zinc-700 text-zinc-200"
+                          }`}
+                        >
                           {conditionLabel(shoe.condition)}
                         </span>
                       )}
-                      <span className={`absolute top-2 right-2 text-xs md:text-sm px-2 py-0.5 rounded-full font-medium ${
-                        mySizes.includes(shoe.size)
-                          ? "bg-blue-500 text-white"
-                          : "bg-black/50 text-white"
-                      }`}>
+                      <span
+                        className={`absolute top-2 right-2 text-xs md:text-sm px-2 py-0.5 rounded-full font-medium ${
+                          mySizes.includes(shoe.size)
+                            ? "bg-blue-500 text-white"
+                            : "bg-black/50 text-white"
+                        }`}
+                      >
                         {shoe.size}
                       </span>
                     </div>
@@ -485,6 +465,80 @@ export default function Dashboard() {
           </>
         )}
 
+        {/* YOUR ALERTS TAB */}
+        {tab === "alerts" && (
+          <>
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-full bg-blue-800">
+                  <IoBagCheckOutline className="text-blue-300" size={22} />
+                </div>
+                <div>
+                  <p className="text-base md:text-lg font-medium text-white">
+                    <span className="text-blue-500 text-xl md:text-2xl">
+                      {alerts.length}
+                    </span>{" "}
+                    shoes tracked
+                  </p>
+                  <p className="text-xs md:text-sm text-zinc-500">
+                    We'll notify you the second they drop
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate("/search")}
+                className="flex items-center gap-2 bg-blue-950 text-blue-300 text-xs md:text-sm px-4 py-2.5 rounded-lg hover:bg-blue-900 transition-colors cursor-pointer"
+              >
+                <IoAddOutline size={16} /> Track a new shoe
+              </button>
+            </div>
+
+            {loadingAlerts ? (
+              <p className="text-zinc-500 text-sm md:text-base">
+                Loading your alerts...
+              </p>
+            ) : alerts.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-zinc-500 text-sm md:text-base mb-4">
+                  No alerts yet
+                </p>
+                <button
+                  onClick={() => navigate("/search")}
+                  className="bg-blue-500 text-white text-xs md:text-sm font-medium px-5 py-2.5 rounded-lg cursor-pointer"
+                >
+                  Track your first shoe
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4"
+                  >
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-zinc-100 shrink-0" />
+                    <div>
+                      <p className="text-sm md:text-base font-medium text-zinc-200 mb-1">
+                        {alert.shoe_name}
+                      </p>
+                      <p className="text-xs md:text-sm text-zinc-500">
+                        {alert.size}
+                      </p>
+                      {alert.max_price && (
+                        <p className="text-xs md:text-sm text-zinc-600">
+                          Max ${parseFloat(alert.max_price).toFixed(0)}
+                        </p>
+                      )}
+                      <span className="inline-block mt-1 text-xs md:text-sm bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
+                        {alert.active ? "Active" : "Paused"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <BottomNav />
