@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import BottomNav from "../components/layout/BottomNav";
 import { useAuth } from "../context/AuthContext";
@@ -11,6 +11,7 @@ import {
   IoBagCheckOutline,
   IoSparklesOutline,
   IoGridOutline,
+  IoTrashOutline,
 } from "react-icons/io5";
 
 function timeAgo(dateStr) {
@@ -63,7 +64,11 @@ const sizeOrder = [
 const isShoeSize = (size) => !clothingAndOther.includes(size);
 
 export default function Dashboard() {
-  const [tab, setTab] = useState("alerts");
+  const location = useLocation();
+  const [tab, setTab] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("tab") || "instock";
+  });
   const [alerts, setAlerts] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loadingAlerts, setLoadingAlerts] = useState(true);
@@ -102,6 +107,20 @@ export default function Dashboard() {
     };
     fetchInventory();
   }, []);
+
+  const handleDeleteAlert = async (alertId) => {
+    try {
+      await api.delete(`/alerts/${alertId}`);
+      // refetch alerts after delete
+      const response = await api.get("/alerts");
+      setAlerts(response.data.data.alerts || []);
+      // setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+
+    } catch (error) {
+      console.error("Failed to delete alert:", error);
+
+    }
+  }
 
   const mySizes = user?.sizes || [];
 
@@ -557,6 +576,12 @@ export default function Dashboard() {
                           {alert.active ? "Active" : "Paused"}
                         </span>
                       </div>
+                      <button
+                        onClick={() => handleDeleteAlert(alert.id)}
+                        className="text-zinc-600 hover:text-red-600 transition-colors shrink-0 cursor-pointer"
+                      >
+                        <IoTrashOutline size={24} />
+                      </button>
                   </div>
                   );
                 })}

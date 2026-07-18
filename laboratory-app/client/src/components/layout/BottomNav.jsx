@@ -5,7 +5,7 @@ import { IoHomeOutline, IoSearchOutline, IoNotificationsOutline, IoPersonOutline
 const items = [
     {label: "Home", path:"/dashboard", icon: IoHomeOutline},
     {label: "Search", path:"/search", icon: IoSearchOutline},
-    {label: "Alerts", path:"/dashboard", icon: IoNotificationsOutline},
+    {label: "Alerts", path:"/dashboard?tab=alerts", icon: IoNotificationsOutline},
     {label: "Profile", path:"/profile", icon: IoPersonOutline},
 ]
 
@@ -21,7 +21,11 @@ export default function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 md:hidden flex justify-around py-3 border-t border-zinc-800 bg-zinc-950 z-50">
         {items.map((item) => {
             const Icon = item.icon;
-            const active = location.pathname === item.path;
+            const active =
+              `${location.pathname}${location.search}` === item.path ||
+              (item.path === "/dashboard" &&
+                location.pathname === "/dashboard" &&
+                !location.search);
             return (
             <button
                 key={item.label}
