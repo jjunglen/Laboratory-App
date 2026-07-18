@@ -73,6 +73,7 @@ export default function Search() {
                 notify_email: emailNotif,
                 notify_inapp: inAppNotif,
                 stockx_product_id: selectedShoe.productId,
+                stockx_url_key: selectedShoe.urlKey,
 
             });
 

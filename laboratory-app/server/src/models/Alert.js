@@ -32,6 +32,11 @@ const Alert = sequelize.define("Alert", {
         allowNull: true,
 
     },
+    stockx_url_key: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        
+    },
     size: {
         type: DataTypes.STRING,
         allowNull: false,

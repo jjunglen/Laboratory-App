@@ -30,6 +30,14 @@ function conditionLabel(condition) {
   return null;
 }
 
+const getAlertImage = (alert) => {
+  if (!alert.stockx_url_key) return null;
+  return `https://images.stockx.com/images/${alert.stockx_url_key
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("-")}-Product.jpg?fit=fill&bg=FFFFFF&w=300&h=214&fm=webp&auto=compress&q=90`;
+}
+
 const tabs = [
   { key: "instock", label: "In stock" },
   { key: "new", label: "New arrivals" },
@@ -511,30 +519,47 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {alerts.map((alert) => (
+                {alerts.map((alert) => {
+                  const img = getAlertImage(alert);
+                  return (
                   <div
                     key={alert.id}
                     className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4"
                   >
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-zinc-100 shrink-0" />
-                    <div>
-                      <p className="text-sm md:text-base font-medium text-zinc-200 mb-1">
-                        {alert.shoe_name}
-                      </p>
-                      <p className="text-xs md:text-sm text-zinc-500">
-                        {alert.size}
-                      </p>
-                      {alert.max_price && (
-                        <p className="text-xs md:text-sm text-zinc-600">
-                          Max ${parseFloat(alert.max_price).toFixed(0)}
+                    {img ? (
+                      <img 
+                        src={img}
+                        alt={alert.shoe_name}
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-contain bg-white shrink-0"
+                        onError={(event) => {
+                          event.target.style.display = "none";
+                          event.target.nextSibling.style.display = "block";
+                        }}
+                      />
+                      ) : null}
+                      <div 
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-zinc-100 shrink-0"
+                        style={{display: img ? "none" : "block"}}
+                       />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm md:text-base font-medium text-zinc-200 mb-1">
+                          {alert.shoe_name}
                         </p>
-                      )}
-                      <span className="inline-block mt-1 text-xs md:text-sm bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
-                        {alert.active ? "Active" : "Paused"}
-                      </span>
-                    </div>
+                        <p className="text-xs md:text-sm text-zinc-500">
+                          {alert.size}
+                        </p>
+                        {alert.max_price && (
+                          <p className="text-xs md:text-sm text-zinc-600">
+                            Max ${parseFloat(alert.max_price).toFixed(0)}
+                          </p>
+                        )}
+                        <span className="inline-block mt-1 text-xs md:text-sm bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
+                          {alert.active ? "Active" : "Paused"}
+                        </span>
+                      </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

@@ -57,7 +57,7 @@ const createAlert = async (req, res) => {
         console.log("REQ USER:", req.user);
         console.log("REQ USER ID:", req.user.id);
 
-        const { shoe_name, sku, size, max_price, notify_email, notify_inapp, stockx_product_id } = req.body;
+        const { shoe_name, sku, size, max_price, notify_email, notify_inapp, stockx_product_id, stockx_url_key } = req.body;
 
         // Check required fields
         const missing = requireFields(req.body, ["shoe_name", "size"]);
@@ -97,6 +97,8 @@ const createAlert = async (req, res) => {
             notify_email: notify_email ?? true,
             notify_inapp: notify_inapp ?? true,
             stockx_product_id: stockx_product_id || null,
+            stockx_url_key: stockx_url_key || null,
+
         });
 
         return created(res, alert, "Alert created successfully");
@@ -149,7 +151,7 @@ const updateAlert = async (req, res) => {
             active: active ?? alert.active,
         });
 
-        return succes(res, alert, "Alert updated successfully");
+        return success(res, alert, "Alert updated successfully");
 
     } catch(error) {
         console.error("Update alert error:", error.message);
