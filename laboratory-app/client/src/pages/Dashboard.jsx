@@ -31,10 +31,10 @@ function conditionLabel(condition) {
 }
 
 const tabs = [
-  { key: "alerts", label: "Your alerts" },
   { key: "instock", label: "In stock" },
   { key: "new", label: "New arrivals" },
   { key: "browse", label: "Browse inventory" },
+  { key: "alerts", label: "Your alerts" },
 ];
 
 const clothingAndOther = [
