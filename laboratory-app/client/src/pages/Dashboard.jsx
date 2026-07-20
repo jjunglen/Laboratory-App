@@ -108,6 +108,13 @@ export default function Dashboard() {
     fetchInventory();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabFromUrl = params.get("tab");
+    setTab(tabFromUrl || "instock");
+  }, [location.search, location.pathname]);
+
+
   const handleDeleteAlert = async (alertId) => {
     try {
       await api.delete(`/alerts/${alertId}`);
@@ -226,7 +233,7 @@ export default function Dashboard() {
             ) : inStockItems.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-zinc-500 text-sm md:text-base mb-2">
-                  Nothing in stock in your sizes right now
+                  Nothing in stock in your size right now
                 </p>
                 <p className="text-zinc-600 text-xs md:text-sm">
                   Track a specific shoe to get notified when it drops

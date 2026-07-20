@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios.js"
 
 const AuthContext = createContext(null);
@@ -6,7 +6,33 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token") || null);
-    const [loading, setLoading] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const restoreUser = async () => {
+            const storedToken = localStorage.getItem("token");
+            if (!storedToken) return 
+
+            try {
+                setLoading(true);
+                const response = await api.get("/auth/me");
+                setUser(response.data.data);
+
+            } catch(error) {
+                console.error("Failed to restore user:", error);
+                localStorage.removeItem("token");
+                setToken(null);
+
+            } finally {
+                setLoading(false);
+
+            }
+        };
+
+        restoreUser();
+
+    }, []);
+
 
     const login = async (email, password) => {
         setLoading(true);

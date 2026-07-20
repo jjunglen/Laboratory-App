@@ -43,11 +43,11 @@ export default function Navbar() {
         <AtomLogo className="w-8 h-8 md:w-12 md:h-12 shrink-0" />
         {/* Mobile: short name */}
         <span className="text-sm font-medium md:hidden inline">
-          The <span className="text-blue-500">Lab</span>
+          Lab <span className="text-blue-500">Sync</span>
         </span>
         {/* Desktop: full name */}
         <span className="text-sm md:text-xl font-medium hidden md:inline">
-          The <span className="text-blue-500">Laboratory</span>
+          Lab <span className="text-blue-500">Sync</span>
         </span>
       </div>
 

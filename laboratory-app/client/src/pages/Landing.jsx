@@ -1,16 +1,49 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar"
 import BottomNav from "../components/layout/BottomNav";
+import api from "../api/axios.js"
+
+const clothingAndOther = [
+        "XS", "S", "M", "L", "XL", "XXL", "XXXL", "2XL", "3XL",
+        "OS", "O/S", "4C", "4Y", "4.5Y", "5Y", "5.5Y", "6Y", "6.5Y",
+        "7Y", "7.5Y", "8Y", "7 1/8", "7 1/4", "7 3/8", "7 1/2",
+        "7 5/8", "7 3/4", "7 7/8", "8", "7", "Medium",
+    ];
+
+const isShoeSize = (size) => !clothingAndOther.includes(size);
 
 export default function Landing() {
     const navigate = useNavigate();
+    const [ inventory, setInventory] = useState([]);
+
+    useEffect(() => {
+        const fetchInventory = async () => {
+            try {
+                const response = await api.get("/inventory");
+                setInventory(response.data.data || []);
+
+            } catch (error) {
+                console.error("Failed to fetch inventory:", error);
+
+            }
+        };
+        fetchInventory();
+
+    }, []);
+
+    const shoeInventory = inventory.filter((item) => item.available > 0 && isShoeSize(item.size) && item.image_url);
+
+    const tickerItems = shoeInventory.length > 0 ? [...shoeInventory, ...shoeInventory] : [];
+
+    const recentDrops = [...shoeInventory].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3);
 
     return (
     <div className="min-h-screen bg-zinc-950 text-white pb-20 md:pb-0">
         <Navbar />
 
         {/* Hero */}
-        <div className="text-center px-12 py-28">
+        <div className="text-center px-12 py-40">
           <p className="text-sm md:text-base text-blue-500 font-bold tracking-widest mb-4 md:mb-6">
             REAL-TIME SNEAKER ALERTS
           </p>
@@ -44,18 +77,23 @@ export default function Landing() {
             LIVE INVENTORY
           </p>
             <div className="flex gap-3 animate-marquee w-max">
-            {[...Array(32)].map((_, i) => (
+            {tickerItems.map((item, i) => (
                 <div
-                    key={i}
-                    className=" shrink-0 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden"
+                    key={`${item.id}-${i}`}
+                    onClick={() => navigate("/auth")}
+                    className="shrink-0 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden cursor-pointer"
                 >
-                    <div className="h-32 w-48 bg-zinc-100" />
-                    <div className="p-3">
-                    <p className="text-sm md:text-base mb-2 text-zinc-400">
-                        Sneaker name
+                    <img 
+                        src={item.image_url.includes("?") ? `${item.image_url}&width=200` : `${item.image_url}?width=200`}
+                        alt={item.shoe_name}
+                        className="w-full h-36 object-contain bg-white"
+                    />
+                    <div className="p-3 flex flex-col justify-between" style={{height: "120px"}}>
+                    <p className="text-sm md:text-base mb-2 text-zinc-400 w-48 line-clamp-2 ">
+                        {item.shoe_name}
                     </p>
                     <p className="text-base md:text-lg text-blue-500 font-medium">
-                        $XXX
+                        ${parseFloat(item.price).toFixed(0)}
                     </p>
                     </div>
                 </div>
@@ -89,21 +127,51 @@ export default function Landing() {
             <p className="text-xs md:text-sm text-blue-500 font-bold tracking-wide mb-2">RECENT DROPS</p>
             <h2 className="text-xl md:text-2xl font-medium mb-5 md:mb-8">What's in The Lab right now</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden">
-                        <div className="h-48 bg-zinc-100" />
-                            <div className="p-4">
-                                <p className="text-sm md:text-lg font-medium text-zinc-200 mb-1">Shoe Name</p>
-                                <p className="text-xs md:text-sm text-zinc-500 mb-4">SKU-000-000</p>
+                {recentDrops.length > 0 ? (
+                    recentDrops.map((shoe) => (
+                    <div 
+                        key={shoe.id} 
+                        onClick={() => navigate("/auth")} 
+                        className="bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden"
+                    >
+                        <img 
+                            src={shoe.image_url.includes("?") ? `${shoe.image_url}&width=400` : `${shoe.image_url}?width=400`} 
+                            alt={shoe.shoe_name}
+                            className="h-48 w-full object-contain bg-white"
+                        />
+                            <div className="p-4 flex flex-col justify-between" style={{height: "160px"}}>
+                                <p className="text-sm md:text-lg line-clamp-2 leading-tight font-medium text-zinc-200 mb-1">{shoe.shoe_name}</p>
+                                <p className="text-xs md:text-sm text-zinc-500 mb-4">{shoe.sku}</p>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm md:text-base font-medium  text-blue-500">$XXX</span>
-                                    <button className="text-xs md:text-base font-bold bg-blue-800 text-blue-200 px-3 py-1.5 rounded-lg">
+                                    <span className="text-sm md:text-base font-medium  text-blue-500">${parseFloat(shoe.price).toFixed(0)}</span>
+                                    <button 
+                                        className="text-xs md:text-base cursor-pointer font-bold bg-blue-800 text-blue-200 px-3 py-1.5 rounded-lg"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            navigate("/auth");
+                                        }}
+                                    >
                                         Notify me
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    ))
+                ) : (
+                    [1, 2, 3].map((i) => (
+                        <div key={i} className="bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden">
+                            <div className="h-48 bg-zinc-700 animate-pulse" />
+                            <div className="p-4">
+                                <div className="h-4 w-40 bg-zinc-700 rounded animate-pulse mb-2" />
+                                <div className="h-3 w-24 bg-zinc-700 rounded animate-pulse mb-4" />
+                                <div className="flex justify-between">
+                                    <div className="h-4 w-16 bg-zinc-700 rounded animate-pulse" />
+                                    <div className="h-8 w-20 bg-zinc-700 rounded animate-pulse" />
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
 
