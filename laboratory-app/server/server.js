@@ -39,7 +39,11 @@ app.use(helmet());
 // Allows the frontend to make requests to this backend
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      "https://labsync.cc",
+      "https://www.labsync.cc",
+      process.env.NODE_ENV !== "production" ? "http://localhost:5173" : null,
+    ].filter(Boolean),
     credentials: true,
   }),
 );
