@@ -156,14 +156,15 @@ export default function Dashboard() {
 
   const availableSizes = [
     "All sizes",
-    ...new Set(shoeInventory.map((i) => i.size).filter(Boolean)),
+    ...new Set(
+      shoeInventory
+        .map((i) => i.size)
+        .filter((size) => sizeOrder.includes(size)), // ← only sizes in sizeOrder
+    ),
   ].sort((a, b) => {
-    const aIdx = sizeOrder.indexOf(a);
-    const bIdx = sizeOrder.indexOf(b);
-    if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
-    if (aIdx === -1) return 1;
-    if (bIdx === -1) return -1;
-    return aIdx - bIdx;
+    if (a === "All sizes") return -1;
+    if (b === "All sizes") return 1;
+    return sizeOrder.indexOf(a) - sizeOrder.indexOf(b);
   });
 
   return (
