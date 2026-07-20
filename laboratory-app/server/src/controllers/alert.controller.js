@@ -54,8 +54,6 @@ const getAlert = async (req, res) => {
 // Create a new alert for the logged in user
 const createAlert = async (req, res) => {
     try {
-        console.log("REQ USER:", req.user);
-        console.log("REQ USER ID:", req.user.id);
 
         const { shoe_name, sku, size, max_price, notify_email, notify_inapp, stockx_product_id, stockx_url_key } = req.body;
 

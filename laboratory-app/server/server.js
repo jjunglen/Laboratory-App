@@ -1,10 +1,14 @@
+require("@aikidosec/firewall");
+
 // Load environment variable first
 require("dotenv").config();
+
 // Required
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+
 
 // Database connection
 const { sequelize, connectDB } = require("./src/config/database.js");

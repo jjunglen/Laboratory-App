@@ -73,7 +73,6 @@ const searchStockX = async (query, pageSize = 10) => {
   );
 
   const data = await response.json();
-  console.log("StockX token response:", data);
 
   if (!response.ok) {
     throw new Error(data.message || "Stockx search failed");
