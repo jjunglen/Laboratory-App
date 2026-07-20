@@ -8,7 +8,7 @@ const { getInventory, getInventoryItem, searchInventory } = require("../controll
 // They only need a token when setting an alert
 
 // GET /api/inventory = get all available inventory
-router.get("/",authenticateToken, getInventory);
+router.get("/", getInventory);
 
 // GET /api/inventory/search - search inventory by name, brand, or sku
 router.get("/search", authenticateToken, searchInventory);
