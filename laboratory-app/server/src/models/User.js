@@ -44,6 +44,11 @@ const User = sequelize.define("User", {
         type: DataTypes.ENUM("user", "admin"),
         defaultValue: "user",
     },
+    notify_size_alerts: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        
+    },
     notify_email: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,

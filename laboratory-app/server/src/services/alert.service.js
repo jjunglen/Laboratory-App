@@ -65,6 +65,41 @@ const checkAlertsForInventory = async (inventoryItem) => {
       matchCount++;
     }
 
+    // After checking specific alerts, also check size alerts users
+    const sizeAlertsUsers = await User.findAll({
+      where: {
+        notify_size_alerts: true,
+      },
+    });
+
+    for (const user of sizeAlertsUsers) {
+      const userSizes = user.sizes || [];
+      if (!userSizes.includes(inventoryItem.size)) continue;
+
+      // double notify if they already have a specific alerts for this shoe
+      // edge case
+      const alreadyNotified = activeAlerts.some(
+        (a) => a.user_id === user.id && isAlertMatch(a, inventoryItem),
+      );
+      if (alreadyNotified) continue;
+
+      // create a virtual alert for notification purposes
+      await sendNotification({
+        alert: {
+          id: null,
+          user_id: user.id,
+          shoe_name: inventoryItem.shoe_name,
+          size: inventoryItem.size,
+          notify_email: user.notify_email,
+          notify_inapp: user.notify_inapp,
+          User: user,
+        },
+        inventory: inventoryItem,
+      });
+
+      matchCount++;
+    }
+
     console.log(
       `Alert check complete — ${matchCount} matches found for ${inventoryItem.shoe_name}`,
     );

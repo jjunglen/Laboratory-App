@@ -58,6 +58,7 @@ export default function Profile() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [priceDrop, setPriceDrop] = useState(false);
+  const [notifySizeAlerts, setNotifySizeAlerts] = useState(false);
 
   // Profile fields
   const [fullName, setFullName] = useState("");
@@ -86,6 +87,8 @@ export default function Profile() {
         setNotifyEmail(data.notify_email ?? true);
         setNotifyInapp(data.notify_inapp ?? true);
         setSizes(data.sizes || []);
+        setNotifySizeAlerts(data.notify_size_alerts ?? false);
+
       } catch (error) {
         console.error("Failed to fetch profile:", error);
       } finally {
@@ -395,6 +398,14 @@ export default function Profile() {
                   field: "notify_inapp",
                   value: notifyInapp,
                   set: setNotifyInapp,
+                },
+                {
+                  label: "Size alerts",
+                  sub: "Get notified when any shoe in your size hits stock",
+                  field: "notify_size_alerts",
+                  value: notifySizeAlerts,
+                  set: setNotifySizeAlerts,
+                  
                 },
                 {
                   label: "Price drops",
