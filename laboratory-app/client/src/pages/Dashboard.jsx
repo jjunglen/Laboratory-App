@@ -27,7 +27,6 @@ function timeAgo(dateStr) {
 function conditionLabel(condition) {
   if (condition === "brand_new") return "Brand New";
   if (condition === "pre_owned") return "Pre-Owned";
-  if (condition === "either") return "Pre-Owned";
   return null;
 }
 
