@@ -35,6 +35,8 @@ const sendNotification = async ({ alert, inventory }) => {
         boxCondition: inventory.boxCondition || "Original Box (Good)",
         price: inventory.price,
         shopify_url: redirectUrl,
+        image_url: inventory.image_url || null,
+        
       });
 
       // Logs the email notification
