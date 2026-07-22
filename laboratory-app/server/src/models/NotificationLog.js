@@ -41,6 +41,11 @@ const NotificationLog = sequelize.define("NotificationLog", {
         allowNull: false,
         comment: "How the notification was sent",
     },
+    image_url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        
+    },
     message: {
         type: DataTypes.TEXT,
         allowNull: true,

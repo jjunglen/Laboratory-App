@@ -31,7 +31,7 @@ const getProfile = async (req, res) => {
 // Updates the logged in user's profile
 const updateProfile = async (req, res) => {
     try {
-        const { full_name, email, notify_email, notify_inapp, sizes } = req.body;
+        const { full_name, email, notify_email, notify_inapp, sizes, notify_size_alerts } = req.body;
 
         // Find the user
         const user = await User.findByPk(req.user.id);
@@ -66,6 +66,7 @@ const updateProfile = async (req, res) => {
             notify_email: notify_email ?? user.notify_email,
             notify_inapp: notify_inapp ?? user.notify_inapp,
             sizes: sizes ?? user.sizes,
+            notify_size_alerts: notify_size_alerts ?? user.notify_size_alerts,
 
         });
 
@@ -76,6 +77,8 @@ const updateProfile = async (req, res) => {
             notify_email: user.notify_email,
             notify_inapp: user.notify_inapp,
             sizes: user.sizes,
+            notify_size_alerts: user.notify_size_alerts,
+            
             
         }, "Profile updated successfully!");
 

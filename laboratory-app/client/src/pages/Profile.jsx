@@ -405,7 +405,6 @@ export default function Profile() {
                   field: "notify_size_alerts",
                   value: notifySizeAlerts,
                   set: setNotifySizeAlerts,
-                  
                 },
                 {
                   label: "Price drops",
@@ -474,36 +473,61 @@ export default function Profile() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {alerts.map((alert) => (
-                    <div
-                      key={alert.id}
-                      className="flex flex-col md:flex-row justify-center md:justify-start gap-3 bg-zinc-800 rounded-lg p-3"
-                    >
-                      <div className="w-full h-32 md:w-24 md:h-24 bg-zinc-100 rounded-lg shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm md:text-base mb-1 font-medium text-zinc-200 truncate">
-                          {alert.shoe_name}
-                        </p>
-                        <p className="text-sm md:text-base mb-1 text-zinc-500">
-                          {alert.size}
-                        </p>
-                        {alert.max_price && (
-                          <p className="text-sm text-zinc-600">
-                            Max ${parseFloat(alert.max_price).toFixed(0)}
-                          </p>
-                        )}
-                        <span className="inline-block text-sm md:text-base bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
-                          {alert.active ? "Active" : "Paused"}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveAlert(alert.id)}
-                        className="text-sm md:text-base text-red-400 hover:text-red-300 transition-colors shrink-0 cursor-pointer"
+                  {alerts.map((alert) => {
+                    const img = alert.stockx_url_key
+                      ? `https://images.stockx.com/images/${alert.stockx_url_key
+                          .split("-")
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(
+                            "-",
+                          )}-Product.jpg?fit=fill&bg=FFFFFF&w=300&h=214&fm=webp&auto=compress&q=90`
+                      : null;
+
+                    return (
+                      <div
+                        key={alert.id}
+                        className="flex flex-col md:flex-row justify-center md:justify-start gap-3 bg-zinc-800 rounded-lg p-3"
                       >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                        {img ? (
+                          <img
+                            src={img}
+                            alt={alert.shoe_name}
+                            className="w-full h-32 md:w-24 md:h-24 rounded-lg object-contain bg-white shrink-0"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "block";
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="w-full h-32 md:w-24 md:h-24 bg-zinc-100 rounded-lg shrink-0"
+                          style={{ display: img ? "none" : "block" }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm md:text-base mb-1 font-medium text-zinc-200 truncate">
+                            {alert.shoe_name}
+                          </p>
+                          <p className="text-sm md:text-base mb-1 text-zinc-500">
+                            {alert.size}
+                          </p>
+                          {alert.max_price && (
+                            <p className="text-sm text-zinc-600">
+                              Max ${parseFloat(alert.max_price).toFixed(0)}
+                            </p>
+                          )}
+                          <span className="inline-block text-sm md:text-base bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full">
+                            {alert.active ? "Active" : "Paused"}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveAlert(alert.id)}
+                          className="text-sm md:text-base text-red-400 hover:text-red-300 transition-colors shrink-0 cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

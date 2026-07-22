@@ -20,6 +20,7 @@ const sendNotification = async ({ alert, inventory }) => {
         inventory_id: inventory.id,
         channel: "in_app",
         message,
+        image_url: inventory.image_url || null,
         read: false,
         sent_at: new Date(),
       });

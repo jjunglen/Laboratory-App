@@ -140,10 +140,10 @@ export default function Search() {
 
       {/* Success banner */}
       {success && (
-        <div className="mx-6 md:mx-10 mb-4 bg-green-950 border border-green-900 text-green-400 text-sm md:text-base rounded-xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-6 md:mx-10 mb-4 bg-green-950 border border-green-900 text-green-400 text-xs md:text-sm rounded-xl px-2 py-4 flex items-center justify-between">
           <span>Alert created! We'll notify you when it drops!</span>
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/dashboard?tab=alerts")}
             className="text-green-300 underline text-xs md:text-sm ml-4"
           >
             View alerts
