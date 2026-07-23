@@ -85,6 +85,14 @@ if (loading) {
     );
 }
 
+if (!user || user.role !=="admin" ) {
+    return (
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+            <p className="text-zinc-500 text-sm md:text-base">404 - Page not found </p>
+        </div>
+    )
+}
+
 const statCards = [
     { label: "Total users", value: stats?.totalUsers ?? 0, blue: true },
     { label: "Total alerts", value: stats?.totalAlerts ?? 0 },

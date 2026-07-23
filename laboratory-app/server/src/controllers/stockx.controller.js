@@ -100,8 +100,28 @@ const searchCatalog = async (req, res) => {
   }
 };
 
+const cacheImage = async (req, res) => {
+  try {
+    const { url_key, image_url } = req.body;
+    if(!url_key || !image_url) return badRequest(res, "Missing url_key or image_url");
+
+    const { StockxImageCache } = require("../models/index.js");
+    await StockxImageCache.upsert({ url_key, image_url });
+    
+    return success(res, null, "Image cached");
+
+
+  } catch (error) {
+    console.error("Cache image error:", error.message);
+    return serverError(res);
+
+  }
+}
+
 module.exports = {
   searchCatalog,
   handleOAuthCallback,
   getAuthUrl,
+  cacheImage,
+  
 };

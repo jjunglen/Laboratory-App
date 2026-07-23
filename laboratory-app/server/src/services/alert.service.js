@@ -48,7 +48,7 @@ const isAlertMatch = (alert, inventory) => {
 // CHECK ALERTS FOR INVENTORY ITEM
 // Takes an inventory item and checks all active
 // alerts to see if any match
-const checkAlertsForInventory = async (inventoryItem) => {
+const checkAlertsForInventory = async (inventoryItem, notifiedUsers = new Set()) => {
   try {
     const activeAlerts = await Alert.findAll({
       where: { active: true },
@@ -60,8 +60,10 @@ const checkAlertsForInventory = async (inventoryItem) => {
     for (const alert of activeAlerts) {
       const matched = isAlertMatch(alert, inventoryItem);
       if (!matched) continue;
+      if (notifiedUsers.has(alert.user_id)) continue;
 
       await sendNotification({ alert, inventory: inventoryItem });
+      notifiedUsers.add(alert.user_id);
       matchCount++;
     }
 
@@ -73,6 +75,7 @@ const checkAlertsForInventory = async (inventoryItem) => {
     });
 
     for (const user of sizeAlertsUsers) {
+      if (notifiedUsers.has(user.id)) continue;
       const userSizes = user.sizes || [];
       if (!userSizes.includes(inventoryItem.size)) continue;
 
@@ -96,7 +99,7 @@ const checkAlertsForInventory = async (inventoryItem) => {
         },
         inventory: inventoryItem,
       });
-
+      notifiedUsers.add(user.id)
       matchCount++;
     }
 

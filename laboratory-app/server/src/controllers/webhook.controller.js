@@ -34,6 +34,9 @@ const handleProductCreate = async (req, res) => {
     // Respond 200 immediately
     res.status(200).json({ received: true });
 
+    // Shared set across all variants - one email per
+    const notifiedUsers = new Set();
+
     // Check alerts for each variant
     for (const variant of variants) {
       if (!variant.inventory_quantity || variant.inventory_quantity < 1) {
@@ -45,7 +48,7 @@ const handleProductCreate = async (req, res) => {
       });
 
       if (inventoryItem) {
-        await checkAlertsForInventory(inventoryItem);
+        await checkAlertsForInventory(inventoryItem, notifiedUsers);
       }
     }
   } catch (error) {
@@ -105,6 +108,8 @@ const handleProductUpdate = async (req, res) => {
 
     res.status(200).json({ received: true });
 
+    const notifiedUsers = new Set();
+
     for (const variant of variants) {
       if (!variant.inventory_quantity || variant.inventory_quantity < 1)
         continue;
@@ -114,7 +119,7 @@ const handleProductUpdate = async (req, res) => {
       });
 
       if (inventoryItem) {
-        await checkAlertsForInventory(inventoryItem);
+        await checkAlertsForInventory(inventoryItem, notifiedUsers);
       }
     }
   } catch (error) {

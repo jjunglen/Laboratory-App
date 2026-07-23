@@ -24,7 +24,7 @@ const trackRedirect = async (req, res) => {
 
         // Log the click - the user is always logged in here
         await AlertClick.create({
-            user_id: req.user.id,
+            user_id: req.user?.id || null,
             alert_id: alert_id || null,
             notification_id: notification_id || null,
             shoe_name: item.shoe_name,
@@ -35,9 +35,10 @@ const trackRedirect = async (req, res) => {
         })
 
         // Mark the notification as read when the user clicks the link
-        if (notification_id) {
-            await NotificationLog.update({ read: true}, { where: { id: notification_id, user_id: req.user.id } });
-        }
+        await NotificationLog.update(
+            { read: true },
+            { where: { id: notification_id } },
+        );
 
         // redirect the user to the shopify product page
         return res.redirect(item.shopify_url);

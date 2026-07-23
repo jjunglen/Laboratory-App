@@ -8,6 +8,8 @@ const Inventory = require("./Inventory.js");
 const NotificationLog = require("./NotificationLog.js")
 const AlertClick = require("./AlertClick.js");
 const Purchase = require("./Purchase.js");
+const StockxImageCache = require("./StockxImageCache.js");
+
 
 // Define the relationships between all models
 
@@ -60,4 +62,5 @@ module.exports = {
     NotificationLog,
     AlertClick,
     Purchase,
+    StockxImageCache,
 };

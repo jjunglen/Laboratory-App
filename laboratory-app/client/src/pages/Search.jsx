@@ -228,12 +228,19 @@ export default function Search() {
                       src={shoe.image_url}
                       alt={shoe.title}
                       className="w-20 h-20 opacity-0 transition-opacity rounded-lg object-contain bg-white shrink-0"
-                      onLoad={(event) =>
+                      onLoad={(event) => {
                         event.target.classList.replace(
                           "opacity-0",
                           "opacity-100",
                         )
-                      }
+
+                        if (!shoe.image_cached) {
+                          api.post("/stockx/image-cache", {
+                            url_key: shoe.urlKey,
+                            image_url: shoe.image_url,
+                          }).catch(() => {})
+                        }
+                      }}
                       onError={(e) => {
                         e.target.style.display = "none";
                         e.target.nextSibling.style.display = "flex";

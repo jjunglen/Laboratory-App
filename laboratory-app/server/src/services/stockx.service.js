@@ -1,5 +1,6 @@
 require("dotenv").config();
 const fetch = require("node-fetch");
+const { StockxImageCache } = require("../models/index.js")
 
 // Stockx api base URL
 const STOCKX_BASE_URL = "https://api.stockx.com/v2";
@@ -78,10 +79,26 @@ const searchStockX = async (query, pageSize = 10) => {
     throw new Error(data.message || "Stockx search failed");
   }
 
-  // In searchStockX, update the map:
-  return (data.products || []).map((product) => ({
+  const products = data.products || [];
+
+  // Check cache for each product
+  const urlKeys = products.map((product) => product.urlKey);
+  const cached = await StockxImageCache.findAll({
+    where: { url_key: urlKeys },
+  });
+
+
+  const cacheMap = {};
+  cached.forEach((c) => {
+    cacheMap[c.url_key] = c.image_url;
+  });
+
+  return products.map((product) => ({
     ...product,
-    image_url: `https://images.stockx.com/images/${urlKeyToImageName(product.urlKey)}-Product.jpg?fit=fill&bg=FFFFFF&w=400&h=300&fm=webp&auto=compress&q=90`,
+    image_url:
+      cacheMap[product.urlKey] ||
+      `https://images.stockx.com/images/${urlKeyToImageName(product.urlKey)}-Product.jpg?fit=fill&bg=FFFFFF&w=400&h=300&fm=webp&auto=compress&q=90`,
+    image_cached: !!cacheMap[product.urlKey],
   }));
 };
 

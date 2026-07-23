@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticateToken } = require("../middleware/auth.middleware");
-const { searchCatalog, handleOAuthCallback, getAuthUrl } = require("../controllers/stockx.controller.js");
+const { searchCatalog, handleOAuthCallback, getAuthUrl, cacheImage } = require("../controllers/stockx.controller.js");
 
 // All stockx routes are protected - token required
 
@@ -15,6 +15,10 @@ router.get("/auth", getAuthUrl);
 
 // GET /api/stockx/callback - StockX redirects here after login
 router.get("/callback", handleOAuthCallback);
+
+// POST /api/stockx/image-cache - save a confirmed working image URL
+router.post("/image-cache", authenticateToken, cacheImage);
+
 
 
 module.exports = router;
