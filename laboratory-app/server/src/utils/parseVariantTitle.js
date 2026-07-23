@@ -1,5 +1,5 @@
 // Helper function that extracts size, condition, and box status
-const parseVariantTitle = (variantTitle) => {
+const parseVariantTitle = (variantTitle, productHandle = "") => {
   const splitTitle = variantTitle.split(" - ").map((part) => part.trim());
 
   const size = splitTitle[0];
