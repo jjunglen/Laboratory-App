@@ -7,7 +7,12 @@ const { success, notFound, forbidden, serverError } = require("../utils/response
 const getNotifications = async (req, res) => {
     try {
         const notifications = await NotificationLog.findAll({
-            where: {user_id: req.user.id},
+            where: {
+                user_id: req.user.id,
+                channel: "in_app",
+
+
+            },
             order: [["sent_at", "DESC"]],
         });
 

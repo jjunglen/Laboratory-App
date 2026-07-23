@@ -47,18 +47,6 @@ const sendNotification = async ({ alert, inventory }) => {
         shopify_url: redirectUrl,
         image_url: inventory.image_url || null,
       });
-
-      if (emailSent) {
-        await NotificationLog.create({
-          user_id: alert.user_id,
-          alert_id: alert.id,
-          inventory_id: inventory.id,
-          channel: "email",
-          message,
-          read: false,
-          sent_at: new Date(),
-        });
-      }
     }
 
     console.log(
