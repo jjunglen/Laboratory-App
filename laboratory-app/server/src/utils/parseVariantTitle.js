@@ -11,6 +11,13 @@ const parseVariantTitle = (variantTitle) => {
   if (itemCondition === "Brand New") condition = "brand_new";
   if (itemCondition === "Pre-Owned") condition = "pre_owned";
 
+  // Fall back to product handle if variant title doesnt have condition
+  if (condition === "either" && productHandle) {
+    if (productHandle.startsWith("brand-new-")) condition = "brand_new";
+    if (productHandle.startsWith("pre-owned-")) condition = "pre_owned";
+    
+  }
+
   return { size, condition, boxCondition };
 };
 

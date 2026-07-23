@@ -13,6 +13,7 @@ const handleProductCreate = async (req, res) => {
     for (const variant of variants) {
       const { size, condition, boxCondition } = parseVariantTitle(
         variant.title,
+        data.handle
       );
 
       await Inventory.upsert({
@@ -88,6 +89,7 @@ const handleProductUpdate = async (req, res) => {
     for (const variant of variants) {
       const { size, condition, boxCondition } = parseVariantTitle(
         variant.title,
+        data.handle
       );
 
       await Inventory.upsert({
