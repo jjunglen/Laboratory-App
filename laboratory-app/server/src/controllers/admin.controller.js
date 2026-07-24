@@ -129,6 +129,44 @@ const getStats = async (req, res) => {
     }
 }
 
+// GET MOST WANTED
+// GET /api/admin/most-wanted
+// Returns shoe with most alerts that arent currently in stock
+const getMostWanted = async (req, res) => {
+    try {
+        const { sequelize } = require("../config/database.js");
+        const { QueryTypes } = require("sequelize");
+
+        const results = await sequelize.query(`
+            SELECT 
+                a.shoe_name,
+                a.sku,
+                COUNT(a.id) as alert_count,
+                COUNT(DISTINCT a.user_id) as user_count,
+                ARRAY_AGG(DISTINCT a.size) as sizes_wanted,
+                MAX(a.created_at) as last_alert_at,
+                bool_or(i.available > 0) as in_stock
+            FROM alerts a
+            LEFT JOIN inventory i ON (
+                i.shoe_name ILIKE a.shoe_name
+                AND i.size = a.size
+                AND i.available > 0
+            )
+            WHERE a.active = true
+            GROUP BY a.shoe_name, a.sku
+            ORDER BY alert_count DESC
+            LIMIT 15
+            `, { type: QueryTypes.SELECT });
+
+        return success(res, results);
+
+    } catch (error) {
+        console.error("Get most wanted error:", error.message);
+        return serverError(res);
+
+    }
+}
+
 // MANUAL INVENTORY SYNC
 // POST /api/admin/inventory/sync
 const manualInventorySync = async (req, res) => {
@@ -152,5 +190,5 @@ module.exports = {
     getAllAlerts,
     getStats,
     manualInventorySync,
-
+    getMostWanted,
 };

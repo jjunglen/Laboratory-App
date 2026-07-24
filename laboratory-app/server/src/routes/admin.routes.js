@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { authenticateToken } = require("../middleware/auth.middleware");
 const { requireAdmin } = require("../middleware/admin.middleware");
-const { getAllUsers, getUserById, deleteUser, getAllAlerts, getStats, manualInventorySync } = require("../controllers/admin.controller.js");
+const { getAllUsers, getUserById, deleteUser, getAllAlerts, getStats, manualInventorySync, getMostWanted } = require("../controllers/admin.controller.js");
 
 // All admin routes route require both a valid token and admin role
 
@@ -23,6 +23,9 @@ router.get("/stats", authenticateToken, requireAdmin, getStats);
 
 // POST /api/admin/inventory/sync - manually trigger an inventory sync
 router.post("/inventory/sync", authenticateToken, requireAdmin, manualInventorySync);
+
+router.get("/most-wanted", authenticateToken, requireAdmin, getMostWanted);
+
 
 
 module.exports = router;

@@ -1,18 +1,26 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { IoHomeOutline, IoSearchOutline, IoNotificationsOutline, IoPersonOutline } from "react-icons/io5";
-
-const items = [
-    {label: "Home", path:"/dashboard", icon: IoHomeOutline},
-    {label: "Search", path:"/search", icon: IoSearchOutline},
-    {label: "Alerts", path:"/dashboard?tab=alerts", icon: IoNotificationsOutline},
-    {label: "Profile", path:"/profile", icon: IoPersonOutline},
-]
+import { IoHomeOutline, IoSearchOutline, IoNotificationsOutline, IoPersonOutline, IoShieldOutline } from "react-icons/io5";
 
 export default function BottomNav() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { token } = useAuth();
+    const { token, user } = useAuth();
+
+    const items = [
+        { label: "Home", path: "/dashboard", icon: IoHomeOutline },
+        { label: "Search", path: "/search", icon: IoSearchOutline },
+        {
+            label: "Alerts",
+            path: "/dashboard?tab=alerts",
+            icon: IoNotificationsOutline,
+        },
+        { label: "Profile", path: "/profile", icon: IoPersonOutline },
+        // Only show admin for admin users
+        ...(user?.role === "admin"
+            ? [{ label: "Admin", path: "/admin", icon: IoShieldOutline }]
+            : []),
+    ];
 
     // Only show on Mobile when logged in
     // if (!token) return null;

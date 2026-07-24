@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 import {
-IoStatsChartOutline,
-IoPeopleOutline,
-IoAlertCircleOutline,
-IoRefreshOutline,
-IoTrashOutline,
-IoSearchOutline,
-IoCloseOutline,
+    IoStatsChartOutline,
+    IoPeopleOutline,
+    IoAlertCircleOutline,
+    IoRefreshOutline,
+    IoTrashOutline,
+    IoSearchOutline,
+    IoCloseOutline,
+
 } from "react-icons/io5";
 
 export default function Admin() {
@@ -20,19 +22,26 @@ const [loading, setLoading] = useState(true);
 const [syncMessage, setSyncMessage] = useState("");
 const [showAllUsers, setShowAllUsers] = useState(false);
 const [showAllAlerts, setShowAllAlerts] = useState(false);
+const [ mostWanted, setMostWanted ] = useState([]);
+
 const navigate = useNavigate();
+const { user } = useAuth();
 
 useEffect(() => {
     const fetchAll = async () => {
     try {
-        const [statsRes, usersRes, alertsRes] = await Promise.all([
+        const [statsRes, usersRes, alertsRes, mostWantedRes] = await Promise.all([
         api.get("/admin/stats"),
         api.get("/admin/users"),
         api.get("/admin/alerts"),
+        api.get("/admin/most-wanted"),
+
         ]);
         setStats(statsRes.data.data);
         setUsers(usersRes.data.data || []);
         setAlerts(alertsRes.data.data || []);
+        setMostWanted(mostWantedRes.data.data || []);
+
     } catch (error) {
         console.error("Failed to fetch admin data:", error);
     } finally {
@@ -83,14 +92,6 @@ if (loading) {
         </p>
     </div>
     );
-}
-
-if (!user || user.role !=="admin" ) {
-    return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-            <p className="text-zinc-500 text-sm md:text-base">404 - Page not found </p>
-        </div>
-    )
 }
 
 const statCards = [
@@ -168,203 +169,250 @@ const AlertRow = ({ alert, i, total }) => (
 );
 
 return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+  <div className="min-h-screen bg-zinc-950 text-white">
     <Navbar />
 
     {/* View All Users Modal */}
     {showAllUsers && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowAllUsers(false)}
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowAllUsers(false)}
         />
         <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col z-10">
-            <div className="flex items-center justify-between p-5 border-b border-zinc-800">
+          <div className="flex items-center justify-between p-5 border-b border-zinc-800">
             <p className="text-base md:text-lg font-medium">
-                All Users ({users.length})
+              All Users ({users.length})
             </p>
             <button
-                onClick={() => setShowAllUsers(false)}
-                className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
+              onClick={() => setShowAllUsers(false)}
+              className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
             >
-                <IoCloseOutline size={24} />
+              <IoCloseOutline size={24} />
             </button>
-            </div>
-            <div className="overflow-y-auto flex-1 px-5">
+          </div>
+          <div className="overflow-y-auto flex-1 px-5">
             {users.map((user, i) => (
-                <UserRow key={user.id} user={user} i={i} total={users.length} />
+              <UserRow key={user.id} user={user} i={i} total={users.length} />
             ))}
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
     )}
 
     {/* View All Alerts Modal */}
     {showAllAlerts && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowAllAlerts(false)}
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowAllAlerts(false)}
         />
         <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col z-10">
-            <div className="flex items-center justify-between p-5 border-b border-zinc-800">
+          <div className="flex items-center justify-between p-5 border-b border-zinc-800">
             <p className="text-base md:text-lg font-medium">
-                All Alerts ({alerts.length})
+              All Alerts ({alerts.length})
             </p>
             <button
-                onClick={() => setShowAllAlerts(false)}
-                className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
+              onClick={() => setShowAllAlerts(false)}
+              className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
             >
-                <IoCloseOutline size={24} />
+              <IoCloseOutline size={24} />
             </button>
-            </div>
-            <div className="overflow-y-auto flex-1 px-5">
+          </div>
+          <div className="overflow-y-auto flex-1 px-5">
             {alerts.map((alert, i) => (
-                <AlertRow
+              <AlertRow
                 key={alert.id}
                 alert={alert}
                 i={i}
                 total={alerts.length}
-                />
+              />
             ))}
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
     )}
 
     <div className="px-6 md:px-10 py-6">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 md:h-13 md:w-13 bg-blue-950 flex items-center justify-center rounded-full shrink-0">
-            <IoStatsChartOutline className="text-blue-400" size={20} />
+          <IoStatsChartOutline className="text-blue-400" size={20} />
         </div>
         <div>
-            <p className="text-base md:text-lg font-medium text-white">
+          <p className="text-base md:text-lg font-medium text-white">
             Admin dashboard
-            </p>
-            <p className="text-xs md:text-sm text-zinc-500">
+          </p>
+          <p className="text-xs md:text-sm text-zinc-500">
             Manage users, alerts, and inventory
-            </p>
+          </p>
         </div>
-        </div>
+      </div>
     </div>
 
     <div className="px-6 md:px-10 pb-10 max-w-6xl mx-auto">
-        {syncMessage && (
+      {syncMessage && (
         <div className="bg-green-950 border border-green-900 text-green-400 text-sm md:text-base rounded-xl px-4 py-3 mb-6 mt-3">
-            {syncMessage}
+          {syncMessage}
         </div>
-        )}
+      )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         {statCards.map((stat) => (
-            <div
+          <div
             key={stat.label}
             className="bg-zinc-900 border border-zinc-800 rounded-xl p-4"
-            >
+          >
             <p className="text-xs md:text-base text-zinc-500 mb-1 md:mb-2">
-                {stat.label}
+              {stat.label}
             </p>
             <p
-                className={`text-2xl md:text-3xl font-medium ${stat.blue ? "text-blue-500" : stat.green ? "text-green-400" : "text-white"}`}
+              className={`text-2xl md:text-3xl font-medium ${stat.blue ? "text-blue-500" : stat.green ? "text-green-400" : "text-white"}`}
             >
-                {stat.value}
+              {stat.value}
             </p>
-            </div>
+          </div>
         ))}
-        </div>
+      </div>
 
-        {/* Users + Alerts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+      {/* Users + Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         {/* Users */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-                <IoPeopleOutline className="text-zinc-400 text-xl md:text-2xl" />
-                <p className="text-base md:text-lg font-medium">
+              <IoPeopleOutline className="text-zinc-400 text-xl md:text-2xl" />
+              <p className="text-base md:text-lg font-medium">
                 Users ({users.length})
-                </p>
+              </p>
             </div>
             {users.length >= 10 && (
-                <button
+              <button
                 onClick={() => setShowAllUsers(true)}
                 className="text-xs md:text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
-                >
+              >
                 View all
-                </button>
+              </button>
             )}
-            </div>
-            <div className="flex flex-col">
+          </div>
+          <div className="flex flex-col">
             {visibleUsers.map((user, i) => (
-                <UserRow
+              <UserRow
                 key={user.id}
                 user={user}
                 i={i}
                 total={visibleUsers.length}
-                />
+              />
             ))}
-            </div>
+          </div>
         </div>
 
         {/* Alerts */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-                <IoAlertCircleOutline className="text-zinc-400 text-xl md:text-2xl" />
-                <p className="text-base md:text-lg font-medium">
+              <IoAlertCircleOutline className="text-zinc-400 text-xl md:text-2xl" />
+              <p className="text-base md:text-lg font-medium">
                 Alerts ({alerts.length})
-                </p>
+              </p>
             </div>
             {alerts.length >= 10 && (
-                <button
-                    onClick={() => setShowAllAlerts(true)}
-                    className="text-xs md:text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
-                >
-                    View all
-                </button>
+              <button
+                onClick={() => setShowAllAlerts(true)}
+                className="text-xs md:text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
+              >
+                View all
+              </button>
             )}
-            </div>
-            <div className="flex flex-col">
-                {visibleAlerts.map((alert, i) => (
-                    <AlertRow
-                    key={alert.id}
-                    alert={alert}
-                    i={i}
-                    total={visibleAlerts.length}
-                    />
-                ))}
-            </div>
+          </div>
+          <div className="flex flex-col">
+            {visibleAlerts.map((alert, i) => (
+              <AlertRow
+                key={alert.id}
+                alert={alert}
+                i={i}
+                total={visibleAlerts.length}
+              />
+            ))}
+          </div>
         </div>
-        </div>
+      </div>
 
-        {/* Inventory management */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      {/* Inventory management */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
         <p className="text-base md:text-xl font-medium mb-2">
-            Inventory management
+          Inventory management
         </p>
         <p className="text-sm md:text-base text-zinc-500 mb-4 leading-relaxed">
-            Manually reset inventory or trigger a resync from Shopify. Webhooks
-            will repopulate automatically after a reset.
+          Manually reset inventory or trigger a resync from Shopify. Webhooks
+          will repopulate automatically after a reset.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button
+          <button
             className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 transition-colors"
             onClick={() => navigate("/dashboard")}
-            >
+          >
             <IoSearchOutline size={16} /> View inventory
-            </button>
-            <button
+          </button>
+          <button
             className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-zinc-800 text-zinc-300 px-4 py-2.5 rounded-lg hover:bg-zinc-700 transition-colors"
             onClick={handleResetInventory}
-            >
+          >
             <IoRefreshOutline size={16} /> Reset inventory
-            </button>
-            <button className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-red-950 text-red-400 px-4 py-2.5 rounded-lg hover:bg-red-900 transition-colors">
+          </button>
+          <button className="cursor-pointer w-full flex items-center gap-2 text-sm md:text-base bg-red-950 text-red-400 px-4 py-2.5 rounded-lg hover:bg-red-900 transition-colors">
             <IoTrashOutline size={16} /> Clear all alerts
-            </button>
+          </button>
         </div>
+      </div>
+
+      {/* Most wanted */}
+      <div className="bg-zinc-950 border-b border-zinc-800 rounded-xl p-5 mt-6 ">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 mb-4 border-b border-zinc-800">
+          <p className="text-base md:text-lg font-medium mb-3">Most Wanted</p>
+          <span className="text-xs md:text-sm text-zinc-500 ml-1">
+            shoes customers want that arent in stock
+          </span>
         </div>
+        <div>
+          {mostWanted.map((shoe, i) => (
+            <div
+              key={i}
+              className={`flex flex-col md:flex-row md:items-center justify-between gap-2 py-3 ${i !== mostWanted.length - 1 ? "border-b border-zinc-800" : ""}`}
+            >
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm md:text-base font-medium text-zinc-200 line-clamp-2 leading-tight">
+                    {shoe.shoe_name}
+                    </p>
+                    <p className="text-xs text-zinc-500">{shoe.sku}</p>
+                    <p className="text-xs text-zinc-600 mt-0.5">
+                    Sizes: {shoe.sizes_wanted?.filter(Boolean).join(", ")}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-center">
+                    <p className="text-base font-semibold text-blue-400">
+                        {shoe.alert_count}
+                    </p>
+                    <p className="text-xs text-zinc-500">alerts</p>
+                    </div>
+                    <div className="text-center">
+                    <p className="text-base font-semibold text-zinc-300">
+                        {shoe.user_count}
+                    </p>
+                    <p className="text-xs text-zinc-500">users</p>
+                    </div>
+                    <span
+                    className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${shoe.in_stock ? "bg-green-950 text-green-400" : "bg-red-950 text-red-400"}`}
+                    >
+                    {shoe.in_stock ? "In stock" : "Not in stock"}
+                    </span>
+                </div>
+                </div>
+            ))}
+        </div>
+      </div>
     </div>
-    </div>
+  </div>
 );
 }
