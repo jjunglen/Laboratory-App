@@ -63,16 +63,10 @@ const handleProductDelete = async (req, res) => {
   try {
     const data = JSON.parse(req.body);
 
-    const item = await Inventory.findOne({
-      where: { shopify_product_id: String(data.id) },
-    });
-
-    if (item) {
-      await item.update({
-        available: 0,
-        last_synced_at: new Date(),
-      });
-    }
+    await Inventory.update(
+      { available: 0, last_synced_at: new Date() },
+      { where: { shopify_product_id: String(data.id) } }
+    );
 
     res.status(200).json({ received: true });
   } catch (error) {

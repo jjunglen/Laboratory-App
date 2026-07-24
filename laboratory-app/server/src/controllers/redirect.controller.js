@@ -22,6 +22,12 @@ const trackRedirect = async (req, res) => {
 
         }
 
+        if (item.available < 1) {
+            return res.redirect(
+                `${process.env.FRONTEND_URL}/dashboard?tab=browse`,
+            );
+        }
+
         // Log the click - the user is always logged in here
         if (req.user?.id) {
                 await AlertClick.create({
