@@ -1,6 +1,6 @@
 const { NotificationLog, Inventory } = require("../models/index.js");
 const { Op } = require("sequelize");
-const { sendAlertEmail, sendPriceDropNotification } = require("./email.service.js");
+const { sendAlertEmail, sendPriceDropEmail } = require("./email.service.js");
 
 const sendNotification = async ({ alert, inventory }) => {
   try {
