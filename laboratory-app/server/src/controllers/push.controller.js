@@ -13,8 +13,8 @@ const subscribe = async (req, res) => {
             endpoint,
             p256dh,
             auth,
-
-        });
+        }, {conflictFields: ["user_id", "endpoint"]});
+        
         return success(res, null, "Subscribed to push notifications");
 
     } catch(error) {
