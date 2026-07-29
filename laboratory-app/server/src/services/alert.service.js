@@ -1,5 +1,5 @@
 const { Alert, Inventory, User } = require("../models/index.js");
-const { sendNotification } = require("./notification.service.js");
+const { sendNotification, sendPriceDropNotification } = require("./notification.service.js");
 const { parseVariantTitle } = require("../utils/parseVariantTitle.js");
 
 // IS ALERT MATCH
@@ -113,6 +113,47 @@ const checkAlertsForInventory = async (inventoryItem, notifiedUsers = new Set())
   }
 };
 
+const checkPriceDropAlerts = async (
+  inventoryItem,
+  notifiedUsers = new Set(),
+) => {
+  try {
+    const activeAlerts = await Alert.findAll({
+      where: { active: true },
+      include: [{ model: User }],
+    });
+
+    let matchCount = 0;
+
+    for (const alert of activeAlerts) {
+      if (notifiedUsers.has(alert.user_id)) continue;
+
+      // Check shoe name and size match
+      const nameMatch = alert.shoe_name
+        .toLowerCase()
+        .split(" ")
+        .every((word) => inventoryItem.shoe_name.toLowerCase().includes(word));
+      if (!nameMatch || alert.size !== inventoryItem.size) continue;
+
+      // Notify if no max price set, or new price is within their max price
+      if (alert.max_price && inventoryItem.price > parseFloat(alert.max_price))
+        continue;
+
+      await sendPriceDropNotification({ alert, inventory: inventoryItem });
+      notifiedUsers.add(alert.user_id);
+      matchCount++;
+    }
+
+    console.log(
+      `Price drop check complete — ${matchCount} matches for ${inventoryItem.shoe_name}`,
+    );
+    return matchCount;
+  } catch (error) {
+    console.error("Check price drop alerts error:", error.message);
+    return 0;
+  }
+};
+
 
 // GET USER ALERT STATS
 const getUserAlertStats = async (userId) => {
@@ -132,4 +173,4 @@ const getUserAlertStats = async (userId) => {
   }
 };
 
-module.exports = { checkAlertsForInventory, isAlertMatch, getUserAlertStats };
+module.exports = { checkAlertsForInventory, isAlertMatch, getUserAlertStats, checkPriceDropAlerts };

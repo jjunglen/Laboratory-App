@@ -63,6 +63,11 @@ const Inventory = sequelize.define("Inventory", {
         comment: "Product image pull from shopify",
 
     },
+    compare_at_price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+
+    },
     last_synced_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

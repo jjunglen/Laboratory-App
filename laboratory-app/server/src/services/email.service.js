@@ -65,4 +65,64 @@ const sendAlertEmail = async ({
   }
 };
 
-module.exports = { sendAlertEmail };
+const sendPriceDropEmail = async ({
+  to,
+  shoe_name,
+  size,
+  new_price,
+  old_price,
+  shopify_url,
+  image_url,
+}) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Laboratory DTX <${process.env.RESEND_FROM_EMAIL}>`,
+      to: [to],
+      subject: `Price drop on ${shoe_name} size ${size}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #ffffff; padding: 32px; border-radius: 12px;">
+          <h1 style="color: #22c55e; font-size: 24px; margin-bottom: 8px;">Price Drop! 🏷️</h1>
+          <p style="color: #888; margin-bottom: 24px;">A shoe you're tracking just dropped in price at The Laboratory DTX.</p>
+
+          ${
+            image_url
+              ? `
+          <div style="background: #ffffff; border-radius: 10px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <img src="${image_url}" alt="${shoe_name}" style="max-width: 300px; height: auto; object-fit: contain;" />
+          </div>
+          `
+              : ""
+          }
+
+          <div style="background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+            <p style="margin: 0 0 8px;"><strong>Shoe:</strong> ${shoe_name}</p>
+            <p style="margin: 0 0 8px;"><strong>Size:</strong> ${size}</p>
+            <p style="margin: 0 0 8px;"><strong>New Price:</strong> <span style="color: #22c55e; font-size: 18px; font-weight: bold;">$${new_price}</span></p>
+            <p style="margin: 0;"><strong>Was:</strong> <span style="color: #888; text-decoration: line-through;">$${old_price}</span></p>
+          </div>
+
+          <a href="${shopify_url}" style="display: inline-block; background: #22c55e; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+            Buy now →
+          </a>
+
+          <p style="color: #444; font-size: 12px; margin-top: 24px;">
+            You're receiving this because you set an alert on The Laboratory DTX app.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend price drop email error:", error);
+      return false;
+    }
+
+    console.log("Price drop email sent:", data.id);
+    return true;
+  } catch (error) {
+    console.error("Send price drop email error:", error.message);
+    return false;
+  }
+};
+
+module.exports = { sendAlertEmail, sendPriceDropEmail };

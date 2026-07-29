@@ -188,7 +188,10 @@ export default function Navbar() {
       {showNotifs && (
         <div className="fixed inset-0 z-50">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifs(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowNotifs(false)}
+          />
 
           {/* Panel */}
           <div
@@ -197,7 +200,9 @@ export default function Navbar() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-              <p className="text-base font-medium text-zinc-300">Notifications</p>
+              <p className="text-base font-medium text-zinc-300">
+                Notifications
+              </p>
               <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <button
@@ -232,26 +237,57 @@ export default function Navbar() {
                 <div className="flex flex-col items-center justify-center h-full text-center px-6">
                   <IoMailOutline size={40} className="text-blue-500 mb-3" />
                   <p className="text-zinc-500 text-sm">No notifications yet</p>
-                  <p className="text-zinc-600 text-xs mt-1">We'll notify you when your shoe drops</p>
+                  <p className="text-zinc-600 text-xs mt-1">
+                    We'll notify you when your shoe drops
+                  </p>
                 </div>
               ) : (
                 <div className="flex flex-col">
-                  {notifications.map((notif, i) => (
+                  {notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`px-5 py-4 border-b border-zinc-800 last:border-0 ${
+                      onClick={() => {
+                        // Mark as read
+                        api
+                          .put(`/notifications/${notif.id}/read`)
+                          .catch(() => {});
+                        setNotifications((prev) =>
+                          prev.map((n) =>
+                            n.id === notif.id ? { ...n, read: true } : n,
+                          ),
+                        );
+                        setUnreadCount((prev) => Math.max(0, prev - 1));
+                        // Redirect through backend to track click and go to Shopify
+                        window.open(
+                          `${import.meta.env.VITE_API_URL}/redirect?inventory_id=${notif.inventory_id}`,
+                          "_blank",
+                        );
+                      }}
+                      className={`px-5 py-4 border-b border-zinc-800 last:border-0 cursor-pointer hover:bg-zinc-800/50 transition-colors ${
                         !notif.read ? "bg-blue-950/20" : ""
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
                         {notif.image_url ? (
-                          <img src={notif.image_url.includes("?") ? `${notif.image_url}&width=60` : `${notif.image_url}?width=60`} alt="shoe" className="w-20 h-20 rounded-lg object-contain bg-white shrink-0" />
+                          <img
+                            src={
+                              notif.image_url.includes("?")
+                                ? `${notif.image_url}&width=60`
+                                : `${notif.image_url}?width=60`
+                            }
+                            alt="shoe"
+                            className="w-12 h-12 rounded-lg object-contain bg-white shrink-0"
+                          />
                         ) : (
-                          <div className="w-20 h-20 rounded-lg bg-zinc-800 shrink-0" />
+                          <div className="w-12 h-12 rounded-lg bg-zinc-800 shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-zinc-200 leading-relaxed">{notif.message}</p>
-                          <p className="text-xs text-zinc-500 mt-1">{timeAgo(notif.sent_at)}</p>
+                          <p className="text-sm text-zinc-200 leading-relaxed">
+                            {notif.message}
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">
+                            {timeAgo(notif.sent_at)}
+                          </p>
                         </div>
                         {!notif.read && (
                           <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />

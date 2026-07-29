@@ -1,6 +1,6 @@
 const { NotificationLog, Inventory } = require("../models/index.js");
 const { Op } = require("sequelize");
-const { sendAlertEmail } = require("./email.service.js");
+const { sendAlertEmail, sendPriceDropNotification } = require("./email.service.js");
 
 const sendNotification = async ({ alert, inventory }) => {
   try {
@@ -59,4 +59,54 @@ const sendNotification = async ({ alert, inventory }) => {
   }
 };
 
-module.exports = { sendNotification };
+const sendPriceDropNotification = async ({ alert, inventory }) => {
+  try {
+    const recentNotification = await NotificationLog.findOne({
+      where: {
+        user_id: alert.user_id,
+        message: { [Op.iLike]: `%price drop%${inventory.shoe_name}%` },
+        sent_at: { [Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // 24 hours
+      },
+    });
+
+    if (recentNotification) return false;
+
+    const redirectUrl = `${process.env.BACKEND_URL}/api/redirect?alert_id=${alert.id}&inventory_id=${inventory.id}`;
+    const message = `Price drop! ${inventory.shoe_name} in size ${inventory.size} is now $${inventory.price} (was $${inventory.compare_at_price}) at The Laboratory DTX`;
+
+    if (alert.notify_inapp) {
+      await NotificationLog.create({
+        user_id: alert.user_id,
+        alert_id: alert.id,
+        inventory_id: inventory.id,
+        channel: "in_app",
+        message,
+        image_url: inventory.image_url || null,
+        read: false,
+        sent_at: new Date(),
+      });
+    }
+
+    if (alert.notify_email && alert.User) {
+      await sendPriceDropEmail({
+        to: alert.User.email,
+        shoe_name: inventory.shoe_name,
+        size: inventory.size,
+        new_price: inventory.price,
+        old_price: inventory.compare_at_price,
+        shopify_url: redirectUrl,
+        image_url: inventory.image_url || null,
+      });
+    }
+
+    console.log(
+      `Price drop notification sent to ${alert.User?.email} for ${inventory.shoe_name}`,
+    );
+    return true;
+  } catch (error) {
+    console.error("Send price drop notification error:", error.message);
+    return false;
+  }
+};
+
+module.exports = { sendNotification, sendPriceDropNotification };

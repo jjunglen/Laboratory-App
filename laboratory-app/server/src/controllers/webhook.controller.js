@@ -1,6 +1,6 @@
 const { Inventory, Alert, User } = require("../models/index.js");
 const { parseVariantTitle } = require("../utils/parseVariantTitle.js");
-const { checkAlertsForInventory } = require("../services/alert.service.js");
+const { checkAlertsForInventory, checkPriceDropAlerts } = require("../services/alert.service.js");
 
 // HANDLE PRODUCT CREATE
 // POST /api/webhooks/shopify/products/create
@@ -80,11 +80,18 @@ const handleProductUpdate = async (req, res) => {
     const variants = data.variants || [];
     const imageUrl = data.images?.[0]?.src || null;
 
+    const priceDropVariants = [];
+
     for (const variant of variants) {
       const { size, condition, boxCondition } = parseVariantTitle(
         variant.title,
-        data.handle
+        data.handle,
       );
+
+      const newPrice = parseFloat(variant.price) || null;
+      const compareAtPrice = parseFloat(variant.compare_at_price) || null;
+      const isPriceDrop =
+        compareAtPrice && newPrice && newPrice < compareAtPrice;
 
       await Inventory.upsert({
         shopify_product_id: String(data.id),
@@ -94,28 +101,55 @@ const handleProductUpdate = async (req, res) => {
         size: size,
         condition: condition,
         box_status: boxCondition,
-        price: parseFloat(variant.price) || null,
+        price: newPrice,
+        compare_at_price: compareAtPrice || null, 
         available: variant.inventory_quantity || 0,
         shopify_url: `https://thelabdtx.com/products/${data.handle}`,
         image_url: imageUrl,
         last_synced_at: new Date(),
       });
+
+      if (isPriceDrop && variant.inventory_quantity > 0) {
+        priceDropVariants.push({
+          variant,
+          size,
+          condition,
+          newPrice,
+          compareAtPrice,
+        });
+      }
     }
 
     res.status(200).json({ received: true });
 
     const notifiedUsers = new Set();
 
+    // Check regular alerts
     for (const variant of variants) {
       if (!variant.inventory_quantity || variant.inventory_quantity < 1)
         continue;
-
       const inventoryItem = await Inventory.findOne({
         where: { shopify_variant_id: String(variant.id) },
       });
-
       if (inventoryItem) {
         await checkAlertsForInventory(inventoryItem, notifiedUsers);
+      }
+    }
+
+    // Check price drop alerts
+    if (priceDropVariants.length > 0) {
+      for (const {
+        variant,
+        size,
+        newPrice,
+        compareAtPrice,
+      } of priceDropVariants) {
+        const inventoryItem = await Inventory.findOne({
+          where: { shopify_variant_id: String(variant.id) },
+        });
+        if (inventoryItem) {
+          await checkPriceDropAlerts(inventoryItem, notifiedUsers);
+        }
       }
     }
   } catch (error) {

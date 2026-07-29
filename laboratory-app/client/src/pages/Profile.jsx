@@ -444,9 +444,9 @@ export default function Profile() {
                   </button>
                 </div>
               ))}
-              <p className="text-sm md:text-base text-zinc-600 mt-3">
+              {/* <p className="text-sm md:text-base text-zinc-600 mt-3">
                 Price drop notification coming soon!
-              </p>
+              </p> */}
             </div>
           )}
 
