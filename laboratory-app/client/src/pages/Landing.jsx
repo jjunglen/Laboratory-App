@@ -45,7 +45,7 @@ export default function Landing() {
         if (!tickerRef.current || tickerItems.length === 0) return
         
         const el = tickerRef.current;
-        const speed = 0.5;
+        const speed = 1;
 
         const tick = () => {
             posRef.current -= speed;
