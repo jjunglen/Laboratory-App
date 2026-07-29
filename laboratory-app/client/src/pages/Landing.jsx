@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "../components/layout/Navbar"
 import BottomNav from "../components/layout/BottomNav";
 import api from "../api/axios.js"
@@ -16,6 +16,9 @@ const isShoeSize = (size) => !clothingAndOther.includes(size);
 export default function Landing() {
     const navigate = useNavigate();
     const [ inventory, setInventory] = useState([]);
+    const tickerRef = useRef(null);
+    const animFrameRef = useRef(null);
+    const posRef = useRef(0);
 
     useEffect(() => {
         const fetchInventory = async () => {
@@ -37,6 +40,30 @@ export default function Landing() {
     const tickerItems = shoeInventory.length > 0 ? [...shoeInventory, ...shoeInventory] : [];
 
     const recentDrops = [...shoeInventory].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3);
+
+    useEffect(() => {
+        if (!tickerRef.current || tickerItems.length === 0) return
+        
+        const el = tickerRef.current;
+        const speed = 0.5;
+
+        const tick = () => {
+            posRef.current -= speed;
+            // Reset when we've scrolled half the width (seamless loop)
+            if (Math.abs(posRef.current) >= el.scrollWidth / 2) {
+                posRef.current = 0;
+
+            }
+            el.style.transform = `translateX(${posRef.current}px)`;
+            animFrameRef.current = requestAnimationFrame(tick)
+
+        };
+
+        animFrameRef.current = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(animFrameRef.current);
+
+    }, [tickerItems]);
+
 
     return (
     <div className="min-h-screen bg-zinc-950 text-white pb-20 md:pb-0">
@@ -73,32 +100,53 @@ export default function Landing() {
 
         {/* Scroll ticker */}
         <div className="bg-zinc-900 border-t border-b border-zinc-700 py-6 overflow-hidden">
-          <p className="text-center text-xs md:text-lg text-zinc-500 tracking-widest mb-3">
+            <p className="text-center text-xs md:text-lg text-zinc-500 tracking-widest mb-3">
             LIVE INVENTORY
-          </p>
-            <div className="flex gap-3 animate-marquee w-max">
-            {tickerItems.map((item, i) => (
+            </p>
+            {tickerItems.length > 0 ? (
+            <div
+                ref={tickerRef}
+                className="flex gap-3 will-change-transform"
+                style={{ width: "max-content" }}
+            >
+                {tickerItems.map((item, i) => (
                 <div
                     key={`${item.id}-${i}`}
                     onClick={() => navigate("/auth")}
                     className="shrink-0 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden cursor-pointer"
                 >
-                    <img 
-                        src={item.image_url.includes("?") ? `${item.image_url}&width=200` : `${item.image_url}?width=200`}
-                        alt={item.shoe_name}
-                        className="w-full h-36 object-contain bg-white"
+                    <img
+                    src={item.image_url.includes("?")
+                        ? `${item.image_url}&width=200`
+                        : `${item.image_url}?width=200`
+                    }
+                    alt={item.shoe_name}
+                    className="w-48 h-36 object-contain bg-white"
                     />
-                    <div className="p-3 flex flex-col justify-between" style={{height: "120px"}}>
-                    <p className="text-sm md:text-base mb-2 text-zinc-400 w-48 line-clamp-2 ">
+                    <div className="p-3 flex flex-col h-25 justify-between">
+                    <p className="text-sm mb-1 text-zinc-400 w-48 line-clamp-2 leading-tight">
                         {item.shoe_name}
                     </p>
-                    <p className="text-base md:text-lg text-blue-500 font-medium">
+                    <p className="text-base text-blue-500 font-medium">
                         ${parseFloat(item.price).toFixed(0)}
                     </p>
                     </div>
                 </div>
-            ))}
+                ))}
             </div>
+            ) : (
+            <div className="flex gap-3" style={{ width: "max-content" }}>
+                {[...Array(8)].map((_, i) => (
+                <div key={i} className="shrink-0 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden">
+                    <div className="w-48 h-36 bg-zinc-700 animate-pulse" />
+                    <div className="p-3" style={{ height: "80px" }}>
+                    <div className="h-3 w-32 bg-zinc-700 rounded animate-pulse mb-2" />
+                    <div className="h-3 w-16 bg-zinc-700 rounded animate-pulse" />
+                    </div>
+                </div>
+                ))}
+            </div>
+            )}
         </div>
 
         {/* How it works */}
