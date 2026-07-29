@@ -9,6 +9,8 @@ const NotificationLog = require("./NotificationLog.js")
 const AlertClick = require("./AlertClick.js");
 const Purchase = require("./Purchase.js");
 const StockxImageCache = require("./StockxImageCache.js");
+const PushSubscription = require("./PushSubscription.js");
+
 
 
 // Define the relationships between all models
@@ -63,4 +65,5 @@ module.exports = {
     AlertClick,
     Purchase,
     StockxImageCache,
+    PushSubscription,
 };

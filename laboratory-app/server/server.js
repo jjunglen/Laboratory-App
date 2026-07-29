@@ -26,6 +26,8 @@ const webhookRoutes = require("./src/routes/webhook.routes.js");
 const redirectRoutes = require("./src/routes/redirect.routes.js");
 const stockxRoutes = require("./src/routes/stockx.routes.js");
 const adminRoutes = require("./src/routes/admin.routes.js");
+const pushRoutes = require("./src/routes/push.routes.js");
+
 
 // creates express application
 const app = express();
@@ -73,6 +75,8 @@ app.use("/api/webhooks", webhookRoutes);
 app.use("/api/redirect", redirectRoutes);
 app.use("/api/stockx", stockxRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/push", pushRoutes);
+
 
 // Confirmation that the server is running
 app.get("/health", (req, res) => {

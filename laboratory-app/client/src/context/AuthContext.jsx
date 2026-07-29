@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
                 setLoading(true);
                 const response = await api.get("/auth/me");
                 setUser(response.data.data);
+                await registerPush();
 
             } catch(error) {
                 console.error("Failed to restore user:", error);
@@ -44,6 +45,8 @@ export function AuthProvider({ children }) {
             setToken(newToken);
 
             localStorage.setItem("token", newToken);
+            await registerPush();
+
 
             return { success: true, user: userData};
 
@@ -99,6 +102,33 @@ export function AuthProvider({ children }) {
         setUser((prev) => ({ ...prev, ...updatedFields }));
 
     }
+
+    const registerPush = async () => {
+      try {
+        if (!("serviceWorker" in navigator) || !("PushManager" in window))
+            return;
+
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        const existing = await registration.pushManager.getSubscription();
+        if (existing) {
+            await api.post("/push/subscribe", existing.toJSON());
+            return;
+        }
+
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+        });
+
+        await api.post("/push/subscribe", subscription.toJSON());
+        console.log("Push notifications enabled");
+        } catch (error) {
+            console.error("Push registration error:", error.message);
+        }
+    };
 
     return (
         <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser }}>

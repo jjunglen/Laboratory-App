@@ -1,6 +1,8 @@
 const { NotificationLog, Inventory } = require("../models/index.js");
 const { Op } = require("sequelize");
 const { sendAlertEmail, sendPriceDropEmail } = require("./email.service.js");
+const { sendPushNotification } = require("./push.service.js");
+
 
 const sendNotification = async ({ alert, inventory }) => {
   try {
@@ -35,6 +37,13 @@ const sendNotification = async ({ alert, inventory }) => {
         sent_at: new Date(),
       });
     }
+
+    await sendPushNotification(alert.user_id, {
+      title: "Your shoe is in! 👟",
+      body: message,
+      icon: "/favicon.svg",
+      url: redirectUrl,
+    });
 
     if (alert.notify_email && alert.User) {
       const emailSent = await sendAlertEmail({
@@ -86,6 +95,13 @@ const sendPriceDropNotification = async ({ alert, inventory }) => {
         sent_at: new Date(),
       });
     }
+
+    await sendPushNotification(alert.user_id, {
+      title: "Price Drop! 🏷️",
+      body: message,
+      icon: "/favicon.svg",
+      url: redirectUrl,
+    });
 
     if (alert.notify_email && alert.User) {
       await sendPriceDropEmail({
