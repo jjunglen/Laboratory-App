@@ -27,7 +27,7 @@ const redirectRoutes = require("./src/routes/redirect.routes.js");
 const stockxRoutes = require("./src/routes/stockx.routes.js");
 const adminRoutes = require("./src/routes/admin.routes.js");
 const pushRoutes = require("./src/routes/push.routes.js");
-
+const googleAuthRoutes = require("./src/routes/google.auth.routes.js")
 
 // creates express application
 const app = express();
@@ -37,6 +37,9 @@ const PORT = process.env.PORT || 5000;
 
 // Adds secure HTTP headers for every response automatically
 app.use(helmet());
+
+const passport = require("./src/config/passport.js");
+app.use(passport.initialize())
 
 // Allows the frontend to make requests to this backend
 app.use(
@@ -76,6 +79,7 @@ app.use("/api/redirect", redirectRoutes);
 app.use("/api/stockx", stockxRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/push", pushRoutes);
+app.use("/api/auth", googleAuthRoutes)
 
 
 // Confirmation that the server is running

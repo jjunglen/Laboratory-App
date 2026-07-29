@@ -130,8 +130,28 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const setTokenFromGoogle = async (token) => {
+        try {
+            localStorage.setItem("token", token);
+            setToken(token);
+            const response = await api.get("/auth/me");
+            setUser(response.data.data);
+            await registerPush();
+
+            // Navigate based on sizes
+            const user = response.data.data;
+            const hasSize = user?.sizes && user.sizes.length > 0;
+            window.location.href = hasSize ? "/dashboard" : "/omboarding/size";
+
+        } catch(error) {
+            console.error("Failed to set Google token:", error);
+            localStorage.removeItem("token");
+
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, setTokenFromGoogle }}>
             {children}
         </AuthContext.Provider>
     );
