@@ -121,7 +121,7 @@ export default function Landing() {
                         : `${item.image_url}?width=200`
                     }
                     alt={item.shoe_name}
-                    className="w-48 h-36 object-contain bg-white"
+                    className="w-full h-42 object-contain bg-white"
                     />
                     <div className="p-3 flex flex-col h-25 justify-between">
                     <p className="text-sm mb-1 text-zinc-400 w-48 line-clamp-2 leading-tight">
