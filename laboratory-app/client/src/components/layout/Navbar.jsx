@@ -115,10 +115,10 @@ export default function Navbar() {
         >
           <AtomLogo className="w-8 h-8 md:w-12 md:h-12 shrink-0" />
           <span className="text-sm font-medium md:hidden inline">
-            Lab <span className="text-blue-500">Sync</span>
+            Lab<span className="text-blue-500">Sync</span>
           </span>
           <span className="text-sm md:text-xl font-medium hidden md:inline">
-            Lab <span className="text-blue-500">Sync</span>
+            Lab<span className="text-blue-500">Sync</span>
           </span>
         </div>
 
