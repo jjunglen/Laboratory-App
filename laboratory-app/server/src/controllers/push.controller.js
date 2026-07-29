@@ -8,19 +8,19 @@ const subscribe = async (req, res) => {
         const { endpoint, keys } = req.body;
         const { p256dh, auth } = keys;
 
-        await PushSubscription.upsert({
-            user_id: req.user.id,
-            endpoint,
-            p256dh,
-            auth,
-        }, {conflictFields: ["user_id", "endpoint"]});
-        
-        return success(res, null, "Subscribed to push notifications");
+        const [sub, created] = await PushSubscription.findOrCreate({
+        where: { user_id: req.user.id, endpoint },
+        defaults: { p256dh, auth },
+        });
 
-    } catch(error) {
+        if (!created) {
+        await sub.update({ p256dh, auth });
+        }
+
+        return success(res, null, "Subscribed to push notifications");
+    } catch (error) {
         console.error("Subscribe error: ", error.message);
         return serverError(res);
-
     }
 };
 
