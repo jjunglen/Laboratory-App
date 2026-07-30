@@ -1,16 +1,20 @@
-import { Navigate } from "react-router-dom";
+// client/src/utils/ProtectedRoute.jsx
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
 
-export default function ProtectedRoute({ children, adminOnly= false }) {
-    const { token, user } = useAuth();
+export default function ProtectedRoute({ children }) {
+  const { token, loading } = useAuth();
+  const navigate = useNavigate();
 
-    if (!token) {
-        return <Navigate to="/auth" replace />;
-    }
+  useEffect(() => {
+        if (!loading && !token) {
+        navigate("/auth");
+        }
+  }, [token, loading, navigate]);
 
-    if (adminOnly && user?.role !== "admin") {
-        return <Navigate to="/dashboard" replace />;
-    }
+  if (loading) return null;
+  if (!token) return null;
 
-    return children;
+  return children;
 }

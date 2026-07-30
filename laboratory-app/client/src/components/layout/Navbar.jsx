@@ -149,7 +149,7 @@ export default function Navbar() {
                 onClick={handleBellClick}
                 className="relative text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors"
               >
-                <IoMailOutline size={26} className="text-blue-500" />
+                <IoMailOutline size={26} className="text-blue-500 hover:text-zinc-200" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center font-medium">
                     {unreadCount > 9 ? "9+" : unreadCount}
