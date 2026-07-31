@@ -24,7 +24,6 @@ export default function VerifyEmail() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-        <Navbar />
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-blue-950 flex items-center justify-center mb-6">
             <IoMailOutline size={32} className="text-blue-400" />
