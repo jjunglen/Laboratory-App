@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticateToken } = require("../middleware/auth.middleware");
-const { register, login, googleAuth, getMe, logout, verifyEmail } = require("../controllers/auth.controller")
+const { register, login, googleAuth, getMe, logout, verifyEmail, resendVerification } = require("../controllers/auth.controller")
 
 // Public routes no token
 // POST /api/auth/register - create a new account
@@ -22,6 +22,9 @@ router.get("/me", authenticateToken, getMe);
 router.post("/logout", authenticateToken, logout);
 
 router.get("/verify-email", verifyEmail);
+
+router.post("/resend-verification", resendVerification);
+
 
 
 module.exports = router;

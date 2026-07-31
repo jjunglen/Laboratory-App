@@ -226,6 +226,31 @@ const getMe = async (req, res) => {
     }
 };
 
+const resendVerification = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ where: { email } });
+        if (!user)
+        return success(res, null, "If that email exists, we sent a link");
+        if (user.email_verified) return badRequest(res, "Email already verified");
+
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+        await user.update({ verification_token: verificationToken });
+
+        const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${verificationToken}`;
+        await sendVerificationEmail({
+        to: user.email,
+        full_name: user.full_name,
+        verification_url: verificationUrl,
+        });
+
+        return success(res, null, "Verification email sent");
+    } catch (error) {
+        console.error("Resend verification error:", error.message);
+        return serverError(res);
+    }
+};
+
 // LOGOUT
 // POST /api/auth/logout
 const logout = async (req, res) => {
@@ -237,5 +262,5 @@ const logout = async (req, res) => {
     }
 };
 
-module.exports = { register, login, googleAuth, getMe, logout, verifyEmail };
+module.exports = { register, login, googleAuth, getMe, logout, verifyEmail, resendVerification };
 

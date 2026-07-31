@@ -62,6 +62,11 @@ export default function Auth() {
 
         }
 
+        if (tab === "signup") {
+            navigate("/verify-email", { state: { email } });
+            return 
+        }
+
         // route based on whether the user have set sizes yet
         const hasSize = result.user?.sizes && result.user.sizes.length > 0;
 

@@ -27,5 +27,4 @@ router.post("/inventory/sync", authenticateToken, requireAdmin, manualInventoryS
 router.get("/most-wanted", authenticateToken, requireAdmin, getMostWanted);
 
 
-
 module.exports = router;

@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import OnboardingSize from "./pages/OnboardingSize";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
@@ -40,6 +41,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             <Route
               path="/search"
