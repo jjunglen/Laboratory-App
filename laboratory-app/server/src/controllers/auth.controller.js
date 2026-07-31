@@ -91,18 +91,21 @@ const verifyEmail = async (req, res) => {
 
         await user.update({ email_verified: true, verification_token: null });
 
-         return res.redirect(
-           hasSize
-            ? `${process.env.FRONTEND_URL}/dashboard?verified=true`
-            : `${process.env.FRONTEND_URL}/onboarding/size`,
-         );
+        // Generate a JWT so the user is logged in after verifying
+        const { signToken } = require("../utils/jwt.js");
+        const jwtToken = signToken(user);
 
+        const hasSize = user.sizes && user.sizes.length > 0;
+        const destination = hasSize ? "dashboard?verified=true" : "onboarding/size";
+
+        return res.redirect(
+        `${process.env.FRONTEND_URL}/auth?token=${jwtToken}&next=${destination}`,
+        );
     } catch (error) {
         console.error("Verify email error:", error.message);
         return serverError(res);
-
     }
-}
+};
 
 // LOGIN
 // POST /api/auth/login

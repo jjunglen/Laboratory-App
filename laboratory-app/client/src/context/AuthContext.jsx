@@ -11,7 +11,11 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         const restoreUser = async () => {
             const storedToken = localStorage.getItem("token");
-            if (!storedToken) return 
+            if (!storedToken) {
+                setLoading(false);
+                
+                return
+            }
 
             try {
                 setLoading(true);
@@ -130,22 +134,24 @@ export function AuthProvider({ children }) {
         }
     };
 
-    const setTokenFromGoogle = async (token) => {
+    const setTokenFromGoogle = async (token, next = null) => {
         try {
             localStorage.setItem("token", token);
             setToken(token);
             const response = await api.get("/auth/me");
-            setUser(response.data.data);
+            const userData = response.data.data;
+            setUser(userData);
             await registerPush();
-
-            // Navigate based on sizes
-            const user = response.data.data;
-            const hasSize = user?.sizes && user.sizes.length > 0;
-            window.location.href = hasSize ? "/dashboard" : "/omboarding/size";
+            const hasSize = userData?.sizes && userData.sizes.length > 0;
+            const destination = next
+            ? (next.startsWith("/") ? next : `/${next}`)
+            : (hasSize ? "/dashboard" : "/onboarding/size");
+            window.location.href = destination;
 
         } catch(error) {
             console.error("Failed to set Google token:", error);
             localStorage.removeItem("token");
+            setToken(null);
 
         }
     }

@@ -21,6 +21,7 @@ export default function Auth() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
+        const next = params.get("next");
         const errorParam = params.get("error");
 
         if (errorParam) {
@@ -30,7 +31,7 @@ export default function Auth() {
         }
 
         if (token) {
-        setTokenFromGoogle(token);
+        setTokenFromGoogle(token, next);
         // Clean URL
         window.history.replaceState({}, "", "/auth");
 
