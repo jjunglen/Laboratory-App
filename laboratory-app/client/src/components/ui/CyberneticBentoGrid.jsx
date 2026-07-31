@@ -138,6 +138,7 @@ export function CyberneticBentoGrid() {
           <p className="text-zinc-400 text-sm">
             Install as an app. Get push notifications on your phone.
           </p>
+          <p className="text-blue-400 text-sm mt-2">(Coming soon)</p>
         </BentoItem>
       </div>
     </div>

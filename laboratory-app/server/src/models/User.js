@@ -56,6 +56,16 @@ const User = sequelize.define("User", {
     notify_inapp: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+    },
+    email_verified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+
+    },
+    verification_token: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        
     }
 }, {
     tableName: "users",

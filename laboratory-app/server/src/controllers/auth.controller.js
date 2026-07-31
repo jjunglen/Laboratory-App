@@ -1,9 +1,13 @@
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+
 const supabase = require("../config/supabase.js");
 const { User } = require("../models/index.js");
 const { signToken } = require("../utils/jwt.js");
 const { isValidEmail, isValidPassword, requireFields } = require("../utils/validate.js");
 const { success, created, badRequest, unauthorized, serverError } = require("../utils/response.js");
+const { sendVerificationEmail } = require("../services/email.service.js");
+
 
 // register
 // POST /api/auth.register -- creates an account and email
@@ -35,12 +39,26 @@ const register = async (req, res) => {
         // hash password
         const hashPassword = await bcrypt.hash(password, 10);
 
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+
         // Create the new user
         const user = await User.create({
             email,
             password: hashPassword,
             full_name: full_name || null,
+            verification_token: verificationToken,
+            email_verified: false,
+
         })
+
+        const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${verificationToken}`;
+        sendVerificationEmail({
+            to: user.email,
+            full_name: user.full_name,
+            verification_url: verificationUrl,
+        }).catch((err) =>
+            console.error("Failed to send verification email:", err.message),
+        );
 
         // Sign a JWT token for the new user
         const token = signToken(user);
@@ -50,7 +68,9 @@ const register = async (req, res) => {
             email: user.email,
             full_name: user.full_name,
             role: user.role,
-            sizes: user.sizes
+            sizes: user.sizes,
+            email_verified: user.email_verified,
+
         }}, "Account created successfully")
 
     } catch(error) {
@@ -58,6 +78,27 @@ const register = async (req, res) => {
         return serverError(res);
     }   
 };
+
+// Verify email
+// GET /api/auth/verify-email?token=xx
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.query;
+        if (!token) return badRequest(res, "Missing token");
+
+        const user = await User.findOne({ where: { verification_token: token } });
+        if (!user) return badRequest(res, "Invalid or expired token");
+
+        await user.update({ email_verified: true, verification_token: null });
+
+        return res.redirect(`${process.env.FRONTEND_URL}/dashboard?verified=true`);
+
+    } catch (error) {
+        console.error("Verify email error:", error.message);
+        return serverError(res);
+
+    }
+}
 
 // LOGIN
 // POST /api/auth/login
@@ -168,7 +209,9 @@ const getMe = async (req, res) => {
             avatar_url: user.avatar_url,
             notify_email: user.notify_email,
             notify_inapp: user.notify_inapp,
-            sizes: user.sizes
+            sizes: user.sizes,
+            email_verified: user.email_verified,
+
         });
     } catch (error) {
         console.error("Get me error:", error.message);
@@ -187,5 +230,5 @@ const logout = async (req, res) => {
     }
 };
 
-module.exports = { register, login, googleAuth, getMe, logout };
+module.exports = { register, login, googleAuth, getMe, logout, verifyEmail };
 

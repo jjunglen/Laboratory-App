@@ -125,4 +125,37 @@ const sendPriceDropEmail = async ({
   }
 };
 
-module.exports = { sendAlertEmail, sendPriceDropEmail };
+const sendVerificationEmail = async ({ to, full_name, verification_url }) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Laboratory DTX <${process.env.RESEND_FROM_EMAIL}>`,
+      to: [to],
+      subject: `Verify your Lab Sync email`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #ffffff; padding: 32px; border-radius: 12px;">
+          <h1 style="color: #3b82f6; font-size: 24px; margin-bottom: 8px;">Verify your email</h1>
+          <p style="color: #888; margin-bottom: 24px;">Hey ${full_name || "there"}, confirm your email to start getting sneaker alerts from The Laboratory DTX.</p>
+          <a href="${verification_url}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-bottom: 24px;">
+            Verify my email →
+          </a>
+          <p style="color: #444; font-size: 12px; margin-top: 24px;">
+            If you didn't sign up for Lab Sync, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Verification email error:", error);
+      return false;
+    }
+
+    console.log("Verification email sent:", data.id);
+    return true;
+  } catch (error) {
+    console.error("Send verification email error:", error.message);
+    return false;
+  }
+};
+
+module.exports = { sendAlertEmail, sendPriceDropEmail, sendVerificationEmail };
