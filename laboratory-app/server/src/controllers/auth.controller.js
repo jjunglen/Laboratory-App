@@ -91,7 +91,11 @@ const verifyEmail = async (req, res) => {
 
         await user.update({ email_verified: true, verification_token: null });
 
-        return res.redirect(`${process.env.FRONTEND_URL}/dashboard?verified=true`);
+         return res.redirect(
+           hasSize
+            ? `${process.env.FRONTEND_URL}/dashboard?verified=true`
+            : `${process.env.FRONTEND_URL}/onboarding/size`,
+         );
 
     } catch (error) {
         console.error("Verify email error:", error.message);
