@@ -61,6 +61,11 @@ export default function Navbar() {
       }
     };
     fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 20000);
+
+    return () => clearInterval(interval);
+
   }, [token]);
 
   // Close panel when clicking outside
