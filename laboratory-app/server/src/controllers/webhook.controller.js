@@ -1,6 +1,7 @@
-const { Inventory, Alert, User } = require("../models/index.js");
+const { Inventory, Alert, User, Purchase } = require("../models/index.js");
 const { parseVariantTitle } = require("../utils/parseVariantTitle.js");
 const { checkAlertsForInventory, checkPriceDropAlerts } = require("../services/alert.service.js");
+const { Op } = require("sequelize")
 
 // HANDLE PRODUCT CREATE
 // POST /api/webhooks/shopify/products/create
@@ -71,6 +72,56 @@ const handleProductDelete = async (req, res) => {
     res.status(200).json({ received: true });
   } catch (error) {
     console.error("Product delete webhook error:", error.message);
+  }
+};
+
+const handleOrderCreate = async (req, res) => {
+  try {
+    const data = JSON.parse(req.body);
+    res.status(200).json({ received: true });
+
+    const customerEmail = data.email;
+    const shopifyOrderId = String(data.id);
+    const lineItems = data.line_items || [];
+
+    if (!customerEmail) return;
+
+    const user = await User.findOne({ where: { email: customerEmail } });
+
+    for (const item of lineItems) {
+      const shoeName = item.title;
+      const sku = item.sku || null;
+      const price = parseFloat(item.price) || null;
+
+      let alert = null;
+      if (user) {
+        alert = await Alert.findOne({
+          where: {
+            user_id: user.id,
+            shoe_name: {
+              [Op.iLike]: `%${shoeName.split(" ").slice(0, 3).join(" ")}%`,
+            },
+            active: true,
+          },
+        });
+      }
+
+      await Purchase.create({
+        user_id: user?.id || null,
+        alert_id: alert?.id || null,
+        shopify_order_id: shopifyOrderId,
+        shoe_name: shoeName,
+        sku,
+        size: item.variant_title?.split(" - ")?.[0] || null,
+        price_paid: price,
+        customer_email: customerEmail,
+        purchased_at: new Date(data.created_at),
+      });
+
+      console.log(`Purchase recorded — ${shoeName} for ${customerEmail}`);
+    }
+  } catch (error) {
+    console.error("Order create webhook error:", error.message);
   }
 };
 
@@ -158,4 +209,4 @@ const handleProductUpdate = async (req, res) => {
 };
 
 
-module.exports = { handleProductCreate, handleProductDelete, handleProductUpdate };
+module.exports = { handleProductCreate, handleProductDelete, handleProductUpdate, handleOrderCreate };

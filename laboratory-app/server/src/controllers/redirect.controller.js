@@ -30,7 +30,7 @@ const trackRedirect = async (req, res) => {
 
         // Log the click - the user is always logged in here
                 await AlertClick.create({
-                user_id: req.user?.id,
+                user_id: req.user?.id || null,
                 alert_id: alert_id !== "null" ? alert_id: null,
                 notification_id: notification_id || null,
                 shoe_name: item.shoe_name,
@@ -48,8 +48,13 @@ const trackRedirect = async (req, res) => {
             );
         }
 
+        // Build Shopify URL with UTM params for attribution
+         const campaignId = alert_id && alert_id !== "null" ? alert_id : "size_alert";
+        const medium = notification_id ? "notification" : "email";
+         const shopifyUrl = `${item.shopify_url}?utm_source=labsync&utm_medium=${medium}&utm_campaign=${campaignId}`;
+
         // redirect the user to the shopify product page
-        return res.redirect(item.shopify_url);
+        return res.redirect(shopifyUrl);
         
     } catch(error) {
         console.error("Track redirect error:", error.message);
