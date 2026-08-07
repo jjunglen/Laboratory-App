@@ -9,7 +9,7 @@ const User = sequelize.define("User", {
         primaryKey: true,
     },
     auth_id: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: true,
         unique: true,
         comment: "Supa auth user id - set on Google OAuth login",
