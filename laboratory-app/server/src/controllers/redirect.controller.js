@@ -29,7 +29,6 @@ const trackRedirect = async (req, res) => {
         }
 
         // Log the click - the user is always logged in here
-        if (req.user?.id) {
                 await AlertClick.create({
                 user_id: req.user?.id,
                 alert_id: alert_id !== "null" ? alert_id: null,
@@ -40,7 +39,6 @@ const trackRedirect = async (req, res) => {
                 clicked_at: new Date(),
 
             })
-         }
 
         // Mark the notification as read when the user clicks the link
         if (notification_id) {
