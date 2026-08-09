@@ -80,11 +80,65 @@ const handleOrderCreate = async (req, res) => {
     const data = JSON.parse(req.body);
     res.status(200).json({ received: true });
 
-    console.log("Order source:", data.source)
-    console.log("Landing site:", data.landing_site);
-    console.log("Referring site:", data.referring_site);
-    console.log("Customer email:", data.email);
-    
+    const customerEmail = data.email;
+    const shopifyOrderId = String(data.id);
+    const lineItems = data.line_items || [];
+
+    if (!customerEmail) return;
+
+    // Skip POS and store owned orders
+    const tags = (data.tags || "").toLowerCase();
+    const sourceName = (data.source_name || "").toLowerCase();
+    if (sourceName === "pos" || tags.includes("store-owned") || tags.includes("pos")) {
+      console.log(`Skipping POS/store orders for ${customerEmail}`);
+      return
+    }
+
+    // Only record if came through Lab Sync redirect
+    const landingSite = data.landing_site || "";
+    if (!landingSite.includes("utm_source=labsync")) {
+      console.log(`Skipping non-Lab Sync order for ${customerEmail} - no UTM`);
+      return;
+
+    }
+
+    const user = await User.findOne({ where: { email: customerEmail } });
+
+    for (const item of lineItems) {
+      const shoeName = item.title;
+      const sku = item.sku || null;
+      const price = parseFloat(item.price) || null;
+
+      // try to match an alert for reporting purposes only
+      let alert = null;
+      if (user) {
+        alert = await Alert.findOne({
+          where: {
+            user_id: user.id,
+            shoe_name: { [Op.iLike]: `%${shoeName.split(" ").slice(0, 3).join(" ")}%` },
+            active: true,
+          },
+
+        });
+      }
+
+      await Purchase.create({
+        user_id: user?.id || null,
+        alert_id: alert?.id || null,
+        shopify_order_id: shopifyOrderId,
+        shoe_name: shoeName,
+        sku,
+        size: item.variant_title?.split(" - ")?.[0] || null,
+        price_paid: price,
+        customer_email: customerEmail,
+        purchased_at: new Date(data.created_at),
+      });
+      
+      console.log(`Purchase recorded - ${shoeName} for ${customerEmail}`);
+
+    }
+
+
   } catch (error) {
     console.error("Order create webhook error:", error.message);
   }
