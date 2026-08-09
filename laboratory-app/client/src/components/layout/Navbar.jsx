@@ -10,6 +10,7 @@ import {
   IoCloseOutline,
   IoCheckmarkDoneOutline,
   IoTrashOutline,
+  IoShieldOutline,
 } from "react-icons/io5";
 
 function AtomLogo({ className = "w-6 h-6" }) {
@@ -108,6 +109,8 @@ export default function Navbar() {
   const navLinks = [
     { label: "Dashboard", path: "/dashboard", icon: IoGridOutline },
     { label: "Search", path: "/search", icon: IoSearchOutline },
+    ...(user?.role === "admin" ? [{label: "Admin", path: "/admin", icon: IoShieldOutline}] : []),
+    
   ];
 
   return (
