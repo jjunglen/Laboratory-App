@@ -155,7 +155,7 @@ const getMostWanted = async (req, res) => {
             WHERE a.active = true
             GROUP BY a.shoe_name, a.sku
             ORDER BY alert_count DESC
-            LIMIT 15
+            LIMIT 10
             `, { type: QueryTypes.SELECT });
 
         return success(res, results);
@@ -183,6 +183,21 @@ const manualInventorySync = async (req, res) => {
     }
 };
 
+const getPurchases = async (req, res) => {
+    try {
+        const purchases = await Purchase.findAll({
+            order: [["purchased_at", "DESC"]],
+            limit: 15,
+        });
+
+        return success(res, purchases);
+
+    } catch (error) {
+        console.error("Get purchase error:", error.message);
+        return serverError(res);
+    }
+}
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -191,4 +206,5 @@ module.exports = {
     getStats,
     manualInventorySync,
     getMostWanted,
+    getPurchases,
 };
