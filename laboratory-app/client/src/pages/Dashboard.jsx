@@ -375,13 +375,13 @@ function ShoeCell({ shoe, mySizes, showTimeAgo = false }) {
 
         {/* Condition badge — top left */}
         {showTimeAgo ? (
-          <span className="absolute top-2 left-2 text-xs md:text-base font-medium px-2 py-0.5 rounded-full bg-green-900 text-green-300">
+          <span className="absolute top-2 left-2 text-[10px] md:text-base font-medium px-2 py-0.5 rounded-full bg-green-900 text-green-300">
             {timeAgo(shoe.created_at)}
           </span>
         ) : (
           conditionLabel(shoe.condition) && (
             <span
-              className={`absolute top-2 left-2 text-xs md:text-base font-medium px-2 py-0.5 rounded-full ${shoe.condition === "brand_new" ? "bg-green-500 text-white" : "bg-zinc-700/90 text-zinc-200"}`}
+              className={`absolute top-2 left-2 text-[10px] md:text-base font-medium px-2 py-0.5 rounded-full ${shoe.condition === "brand_new" ? "bg-green-500 text-white" : "bg-zinc-700/90 text-zinc-200"}`}
             >
               {conditionLabel(shoe.condition)}
             </span>
@@ -390,7 +390,7 @@ function ShoeCell({ shoe, mySizes, showTimeAgo = false }) {
 
         {/* Size badge — top right */}
         <span
-          className={`absolute top-2 right-2 text-xs md:text-base px-2 py-0.5 rounded-full font-medium ${mySizes?.includes(shoe.size) ? "bg-blue-500 text-white" : "bg-black/60 text-white"}`}
+          className={`absolute top-2 right-2 text-[10px] md:text-base px-2 py-0.5 rounded-full font-medium ${mySizes?.includes(shoe.size) ? "bg-blue-500 text-white" : "bg-black/60 text-white"}`}
         >
           {shoe.size}
         </span>
