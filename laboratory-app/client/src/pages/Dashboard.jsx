@@ -373,27 +373,27 @@ function ShoeCell({ shoe, mySizes, showTimeAgo = false }) {
           <div className="w-full h-full bg-zinc-200" />
         )}
 
-        {/* Badges at bottom of image */}
-        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1">
-          {showTimeAgo ? (
-            <span className="text-[10px] md:text-sm font-medium px-1.5 py-0.5 rounded-full bg-green-900 text-green-300 truncate max-w-[55%]">
-              {timeAgo(shoe.created_at)}
-            </span>
-          ) : conditionLabel(shoe.condition) ? (
+        {/* Condition badge — top left */}
+        {showTimeAgo ? (
+          <span className="absolute top-2 left-2 text-xs md:text-base font-medium px-2 py-0.5 rounded-full bg-green-900 text-green-300">
+            {timeAgo(shoe.created_at)}
+          </span>
+        ) : (
+          conditionLabel(shoe.condition) && (
             <span
-              className={`text-[10px] md:text-xs font-medium px-1.5 py-0.5 rounded-full truncate max-w-[55%] ${shoe.condition === "brand_new" ? "bg-green-500 text-white" : "bg-zinc-700 text-zinc-200"}`}
+              className={`absolute top-2 left-2 text-xs md:text-base font-medium px-2 py-0.5 rounded-full ${shoe.condition === "brand_new" ? "bg-green-500 text-white" : "bg-zinc-700/90 text-zinc-200"}`}
             >
               {conditionLabel(shoe.condition)}
             </span>
-          ) : (
-            <span />
-          )}
-          <span
-            className={`text-[10px] md:text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${mySizes?.includes(shoe.size) ? "bg-blue-500 text-white" : "bg-black/60 text-white"}`}
-          >
-            {shoe.size}
-          </span>
-        </div>
+          )
+        )}
+
+        {/* Size badge — top right */}
+        <span
+          className={`absolute top-2 right-2 text-xs md:text-base px-2 py-0.5 rounded-full font-medium ${mySizes?.includes(shoe.size) ? "bg-blue-500 text-white" : "bg-black/60 text-white"}`}
+        >
+          {shoe.size}
+        </span>
       </div>
 
       <div className="p-3">
