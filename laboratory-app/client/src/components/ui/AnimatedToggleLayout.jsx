@@ -52,7 +52,7 @@ const LayoutButton = ({ isSelected, onClick, isMiddle, label, mode }) => (
 export const ContainerToggle = React.forwardRef(
   ({ children, className = "", ...props }, ref) => {
     const isMobile = window.innerWidth < 768;
-    const [modeIndex, setModeIndex] = React.useState(isMobile ? 0 : 1);
+    const [modeIndex, setModeIndex] = React.useState(1);
     const currentConfig = LAYOUT_CONFIGS[modeIndex];
 
     return (
