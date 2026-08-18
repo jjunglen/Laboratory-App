@@ -163,17 +163,19 @@ const sendDigestEmail = async ({ user, items }) => {
     const itemsHtml = items
       .map(
         (item) => `
-      <div style="background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center;">
+      <div style="background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 20px; margin-bottom: 16px;">
         ${
           item.image_url
-            ? `<img src="${item.image_url}" alt="${item.shoe_name}" style="width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 6px;" />`
+            ? `
+        <div style="background: #ffffff; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: center;">
+          <img src="${item.image_url}" alt="${item.shoe_name}" style="max-width: 220px; height: auto; object-fit: contain;" />
+        </div>
+        `
             : ""
         }
-        <div style="flex: 1;">
-          <p style="margin: 0 0 4px; font-weight: bold;">${item.shoe_name}</p>
-          <p style="margin: 0; color: #888; font-size: 13px;">Size ${item.size} — $${item.price}</p>
-        </div>
-        <a href="${item.shopify_url}" style="background: #378ADD; color: #ffffff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; white-space: nowrap;">
+        <p style="margin: 0 0 4px; font-weight: bold; font-size: 16px;">${item.shoe_name}</p>
+        <p style="margin: 0 0 16px; color: #888; font-size: 14px;">Size ${item.size} — $${item.price}</p>
+        <a href="${item.shopify_url}" style="display: inline-block; background: #378ADD; color: #ffffff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
           View →
         </a>
       </div>
