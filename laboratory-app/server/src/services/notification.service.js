@@ -1,23 +1,34 @@
-const { NotificationLog, Inventory } = require("../models/index.js");
+const {
+  NotificationLog,
+  PendingNotification,
+  Inventory,
+} = require("../models/index.js");
 const { Op } = require("sequelize");
-const { sendAlertEmail, sendPriceDropEmail } = require("./email.service.js");
 const { sendPushNotification } = require("./push.service.js");
-
 
 const sendNotification = async ({ alert, inventory }) => {
   try {
-    // Check if we already sent a notification for this shoe to this user in the last hour
-    const recentNotification = await NotificationLog.findOne({
+    const recentlyQueuedOrSent = await PendingNotification.findOne({
+      where: { user_id: alert.user_id, inventory_id: inventory.id },
+    });
+    if (recentlyQueuedOrSent) {
+      console.log(
+        `Skipping duplicate — ${inventory.shoe_name} already queued/sent for this user`,
+      );
+      return false;
+    }
+
+    const recentEmail = await NotificationLog.findOne({
       where: {
         user_id: alert.user_id,
-        message: { [Op.iLike]: `%${inventory.shoe_name}%` },
-        sent_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) }, // last 1 hour
+        inventory_id: inventory.id,
+        channel: "email",
+        sent_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) },
       },
     });
-
-    if (recentNotification) {
+    if (recentEmail) {
       console.log(
-        `Skipping duplicate notification for ${alert.User?.email} — already notified about ${inventory.shoe_name} recently`,
+        `Skipping duplicate — ${inventory.shoe_name} already emailed to this user in the last hour`,
       );
       return false;
     }
@@ -46,20 +57,21 @@ const sendNotification = async ({ alert, inventory }) => {
     });
 
     if (alert.notify_email && alert.User) {
-      const emailSent = await sendAlertEmail({
-        to: alert.User.email,
+      await PendingNotification.create({
+        user_id: alert.user_id,
+        alert_id: alert.id,
+        inventory_id: inventory.id,
         shoe_name: inventory.shoe_name,
+        sku: inventory.sku,
         size: inventory.size,
-        condition: inventory.condition || "brand_new",
-        boxCondition: inventory.box_status || "Original Box",
         price: inventory.price,
-        shopify_url: redirectUrl,
         image_url: inventory.image_url || null,
+        shopify_url: redirectUrl,
       });
     }
 
     console.log(
-      `Notification sent to ${alert.User?.email} for ${inventory.shoe_name}`,
+      `Notification processed for ${alert.User?.email} — ${inventory.shoe_name}`,
     );
     return true;
   } catch (error) {
@@ -70,15 +82,20 @@ const sendNotification = async ({ alert, inventory }) => {
 
 const sendPriceDropNotification = async ({ alert, inventory }) => {
   try {
-    const recentNotification = await NotificationLog.findOne({
+    const recentlyQueuedOrSent = await PendingNotification.findOne({
+      where: { user_id: alert.user_id, inventory_id: inventory.id },
+    });
+    if (recentlyQueuedOrSent) return false;
+
+    const recentEmail = await NotificationLog.findOne({
       where: {
         user_id: alert.user_id,
-        message: { [Op.iLike]: `%price drop%${inventory.shoe_name}%` },
-        sent_at: { [Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // 24 hours
+        inventory_id: inventory.id,
+        channel: "email",
+        sent_at: { [Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       },
     });
-
-    if (recentNotification) return false;
+    if (recentEmail) return false;
 
     const redirectUrl = `${process.env.BACKEND_URL}/api/redirect?alert_id=${alert.id}&inventory_id=${inventory.id}`;
     const message = `Price drop! ${inventory.shoe_name} in size ${inventory.size} is now $${inventory.price} (was $${inventory.compare_at_price}) at The Laboratory DTX`;
@@ -104,19 +121,21 @@ const sendPriceDropNotification = async ({ alert, inventory }) => {
     });
 
     if (alert.notify_email && alert.User) {
-      await sendPriceDropEmail({
-        to: alert.User.email,
+      await PendingNotification.create({
+        user_id: alert.user_id,
+        alert_id: alert.id,
+        inventory_id: inventory.id,
         shoe_name: inventory.shoe_name,
+        sku: inventory.sku,
         size: inventory.size,
-        new_price: inventory.price,
-        old_price: inventory.compare_at_price,
-        shopify_url: redirectUrl,
+        price: inventory.price,
         image_url: inventory.image_url || null,
+        shopify_url: redirectUrl,
       });
     }
 
     console.log(
-      `Price drop notification sent to ${alert.User?.email} for ${inventory.shoe_name}`,
+      `Price drop notification processed for ${alert.User?.email} — ${inventory.shoe_name}`,
     );
     return true;
   } catch (error) {
