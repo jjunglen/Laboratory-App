@@ -1,7 +1,7 @@
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-// Create new sequalize instance using the DATABASEURL
+// Create new sequelize instance using the DATABASEURL
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
     dialectOptions: {

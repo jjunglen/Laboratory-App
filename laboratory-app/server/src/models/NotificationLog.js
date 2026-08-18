@@ -72,5 +72,3 @@ const NotificationLog = sequelize.define("NotificationLog", {
 });
 
 module.exports = NotificationLog;
-
-4
