@@ -158,4 +158,65 @@ const sendVerificationEmail = async ({ to, full_name, verification_url }) => {
   }
 };
 
-module.exports = { sendAlertEmail, sendPriceDropEmail, sendVerificationEmail };
+const sendDigestEmail = async ({ user, items }) => {
+  try {
+    const itemsHtml = items
+      .map(
+        (item) => `
+      <div style="background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center;">
+        ${
+          item.image_url
+            ? `<img src="${item.image_url}" alt="${item.shoe_name}" style="width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 6px;" />`
+            : ""
+        }
+        <div style="flex: 1;">
+          <p style="margin: 0 0 4px; font-weight: bold;">${item.shoe_name}</p>
+          <p style="margin: 0; color: #888; font-size: 13px;">Size ${item.size} — $${item.price}</p>
+        </div>
+        <a href="${item.shopify_url}" style="background: #378ADD; color: #ffffff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; white-space: nowrap;">
+          View →
+        </a>
+      </div>
+    `,
+      )
+      .join("");
+
+    const { data, error } = await resend.emails.send({
+      from: `The Laboratory DTX <${process.env.RESEND_FROM_EMAIL}>`,
+      to: [user.email],
+      subject: `${items.length} new match${items.length > 1 ? "es" : ""} at The Laboratory DTX`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #ffffff; padding: 32px; border-radius: 12px;">
+          <h1 style="color: #378ADD; font-size: 24px; margin-bottom: 8px;">Your shoes are in.</h1>
+          <p style="color: #888; margin-bottom: 24px;">
+            Hey${user.full_name ? ` ${user.full_name}` : ""}, ${items.length} item${items.length > 1 ? "s" : ""} matching your alerts just hit The Laboratory DTX.
+          </p>
+
+          ${itemsHtml}
+
+          <p style="color: #444; font-size: 12px; margin-top: 24px;">
+            You're receiving this because you set an alert on The Laboratory DTX app.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend digest email error:", error);
+      return false;
+    }
+
+    console.log("Digest email sent:", data.id);
+    return true;
+  } catch (error) {
+    console.error("Send digest email error:", error.message);
+    return false;
+  }
+};
+
+module.exports = {
+  sendAlertEmail,
+  sendPriceDropEmail,
+  sendVerificationEmail,
+  sendDigestEmail,
+};

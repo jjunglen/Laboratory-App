@@ -6,12 +6,14 @@ require("dotenv").config();
 // Required
 const express = require("express");
 const cors = require("cors");
+const cron = require("node-cron");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
 
 // Database connection
-const { sequelize, connectDB } = require("./src/config/database.js");
+const { sequelize } = require("./src/config/database.js");
+const { flushPendingNotifications } = require("./src/services/digest.service.js");
 
 // Models connection
 require("./src/models/index.js");
@@ -57,6 +59,10 @@ app.use(
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
+
+cron.schedule("*/2 * * * *", () => {
+  flushPendingNotifications().catch((err) => console.error("Digest flush error:", err.message));
+});
 
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/api/webhooks")) {
