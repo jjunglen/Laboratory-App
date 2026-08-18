@@ -1,3 +1,7 @@
+const { Op } = require("sequelize");
+const { PendingNotification, User } = require("../models/index.js");
+const { sendDigestEmail } = require("./email.service.js");
+
 const flushPendingNotifications = async () => {
   const pending = await PendingNotification.findAll({ where: { sent: false } });
   if (pending.length === 0) return;
@@ -19,3 +23,5 @@ const flushPendingNotifications = async () => {
     await sendDigestEmail({ user, items });
   }
 };
+
+module.exports = { flushPendingNotifications };
