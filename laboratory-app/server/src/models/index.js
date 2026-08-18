@@ -10,6 +10,7 @@ const AlertClick = require("./AlertClick.js");
 const Purchase = require("./Purchase.js");
 const StockxImageCache = require("./StockxImageCache.js");
 const PushSubscription = require("./PushSubscription.js");
+const PendingNotification = require("./PendingNotification.js");
 
 
 
@@ -25,6 +26,8 @@ User.hasMany(NotificationLog, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasMany(AlertClick, { foreignKey: "user_id", onDelete: "CASCADE" });
 // ONE USAER HAS MANY PURCHASES
 User.hasMany(Purchase, {foreignKey: "user_id", onDelete: "SET NULL" });
+// one user has many pending notifications
+User.hasMany(PendingNotification, { foreignKey: "user_id", onDelete: "CASCADE" });
 
 // BELONGS TO -- reverse associaitions
 Preference.belongsTo(User, {foreignKey: "user_id" });
@@ -32,6 +35,7 @@ Alert.belongsTo(User, {foreignKey: "user_id" });
 NotificationLog.belongsTo(User, {foreignKey: "user_id" });
 AlertClick.belongsTo(User, {foreignKey: "user_id" });
 Purchase.belongsTo(User, {foreignKey: "user_id" });
+PendingNotification.belongsTo(User, { foreignKey: "user_id" });
 
 // Alert associations
 // One alert has many notification logs
@@ -66,4 +70,6 @@ module.exports = {
     Purchase,
     StockxImageCache,
     PushSubscription,
+    PendingNotification,
+    
 };
