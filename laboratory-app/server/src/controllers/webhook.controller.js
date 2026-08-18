@@ -125,7 +125,7 @@ const handleOrderCreate = async (req, res) => {
     cutoff.setDate(cutoff.getDate() - ATTRIBUTION_WINDOW_DAYS);
 
     const userAlerts = await Alert.findAll({
-      where: { user_id: user.id },
+      where: { user_id: user.id, created_at: { [Op.gte]: cutoff } },
     });
     const recentClicks = await AlertClick.findAll({
       where: { user_id: user.id, clicked_at: { [Op.gte]: cutoff } },
