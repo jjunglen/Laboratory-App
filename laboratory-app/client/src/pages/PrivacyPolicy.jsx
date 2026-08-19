@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">9. Contact</h2>
-            <p className="text-zinc-400">For privacy questions, contact us at <a href="mailto:j.junglen@gmail.com" className="text-blue-400 hover:underline">j.junglen@gmail.com</a></p>
+            <p className="text-zinc-400">For privacy questions, contact us at <a href="mailto:thelabdtx@gmail.com" className="text-blue-400 hover:underline">thelabdtx@gmail.com</a></p>
           </section>
 
         </div>

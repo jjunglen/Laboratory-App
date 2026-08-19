@@ -137,10 +137,10 @@ export default function TermsOfService() {
             <p className="text-zinc-400">
               For questions about these terms, contact us at{" "}
               <a
-                href="mailto:j.junglen@gmail.com"
+                href="mailto:thelabdtx@gmail.com"
                 className="text-blue-400 hover:underline"
               >
-                j.junglen@gmail.com
+                thelabdtx@gmail.com
               </a>
             </p>
           </section>
