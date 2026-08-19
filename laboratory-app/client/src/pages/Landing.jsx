@@ -73,40 +73,40 @@ export default function Landing() {
 
         {/* Hero */}
         <div className="relative text-center px-12 py-40 overflow-hidden">
-            {/* Shader background */}
-            <BeamsBackground intensity="medium"/>
+          {/* Shader background */}
+          <BeamsBackground intensity="medium" />
 
-            {/* Dark overlay so text is readable */}
-            <div className="absolute inset-0 bg-zinc-950/80" />
+          {/* Dark overlay so text is readable */}
+          <div className="absolute inset-0 bg-zinc-950/80" />
 
-            {/* Hero content — must be above shader */}
-            <div className="relative z-10">
-                <p className="text-sm md:text-base text-blue-500 font-bold tracking-widest mb-4 md:mb-6">
-                REAL-TIME SNEAKER ALERTS
-                </p>
-                <h1 className="text-2xl md:text-4xl font-bold leading-tight md:mb-6 mb-5">
-                Get notified when your{" "}
-                <span className="text-blue-500">next pair</span> drops in store
-                </h1>
-                <p className="text-zinc-400 text-xs font-medium md:text-lg max-w-md mx-auto mb-10">
-                Set your size, pick your shoe, and we'll alert you the moment it
-                hits our inventory
-                </p>
-                <div className="flex gap-3 justify-center">
-                <button
-                    onClick={() => navigate("/auth")}
-                    className="bg-blue-500 text-white font-medium cursor-pointer px-5 py-2.5 text-xs md:text-lg tracking-wider md:tracking-normal rounded-lg hover:bg-blue-600 transition-colors active:bg-blue-500"
-                >
-                    Create your alerts
-                </button>
-                <button
-                    className="border border-blue-500 text-blue-500 cursor-pointer text-xs md:text-lg tracking-wider md:tracking-normal px-5 py-2.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
-                    onClick={() => navigate("/auth")}
-                >
-                    Browse inventory
-                </button>
-                </div>
+          {/* Hero content — must be above shader */}
+          <div className="relative z-10">
+            <p className="text-sm md:text-base text-blue-500 font-bold tracking-widest mb-4 md:mb-6">
+              REAL-TIME SNEAKER ALERTS
+            </p>
+            <h1 className="text-2xl md:text-4xl font-bold leading-tight md:mb-6 mb-5">
+              Get notified when your{" "}
+              <span className="text-blue-500">next pair</span> drops in store
+            </h1>
+            <p className="text-zinc-400 text-xs font-medium md:text-lg max-w-md mx-auto mb-10">
+              Set your size, pick your shoe, and we'll alert you the moment it
+              hits our inventory
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => navigate("/auth")}
+                className="bg-blue-500 text-white font-medium cursor-pointer px-5 py-2.5 text-xs md:text-lg tracking-wider md:tracking-normal rounded-lg hover:bg-blue-600 transition-colors active:bg-blue-500"
+              >
+                Create your alerts
+              </button>
+              <button
+                className="border border-blue-500 text-blue-500 cursor-pointer text-xs md:text-lg tracking-wider md:tracking-normal px-5 py-2.5 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                onClick={() => navigate("/auth")}
+              >
+                Browse inventory
+              </button>
             </div>
+          </div>
         </div>
 
         {/* Scroll ticker */}
@@ -263,11 +263,14 @@ export default function Landing() {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-zinc-800 flex justify-between">
-          <span className="text-sm md:text-base text-zinc-600">
-            The Laboratory DTX - Dallas, TX
-          </span>
-          <span className="text-sm md:text-base text-zinc-600">© 2026</span>
+        <div className="flex gap-4 justify-center text-xs text-zinc-600 py-6 border-t border-zinc-900">
+          <a href="/privacy" className="hover:text-zinc-400 transition-colors">
+            Privacy Policy
+          </a>
+          <a href="/terms" className="hover:text-zinc-400 transition-colors">
+            Terms of Service
+          </a>
+          <span>© 2026 The Laboratory DTX</span>
         </div>
 
         <BottomNav />

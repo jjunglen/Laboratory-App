@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import OnboardingSize from "./pages/OnboardingSize";
 import VerifyEmail from "./pages/VerifyEmail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
@@ -31,6 +33,8 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
 
             {/* Protected Routes */}
             <Route
