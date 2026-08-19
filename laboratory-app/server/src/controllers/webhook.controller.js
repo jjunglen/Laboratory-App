@@ -57,6 +57,17 @@ const handleProductCreate = async (req, res) => {
 
     res.status(200).json({ received: true });
 
+    // Only notify once the listing is actually ready
+    const isPublished = !!data.published_at;
+    const hasImage = !!data.images?.[0]?.src;
+
+    if (!isPublished || !hasImage) {
+      console.log(
+        `Skipping alert check — ${data.title} not ready yet (published: ${isPublished}, image: ${hasImage})`,
+      );
+      return;
+    }
+
     const notifiedUsers = new Set();
 
     for (const variant of variants) {
@@ -214,6 +225,16 @@ const handleProductUpdate = async (req, res) => {
 
     res.status(200).json({ received: true });
 
+    const isPublished = !!data.published_at;
+    const hasImage = !!data.images?.[0]?.src;
+
+    if (!isPublished || !hasImage) {
+      console.log(
+        `Skipping alert check — ${data.title} not ready yet (published: ${isPublished}, image: ${hasImage})`,
+      );
+      return;
+    }
+
     const notifiedUsers = new Set();
 
     for (const variant of variants) {
@@ -228,12 +249,7 @@ const handleProductUpdate = async (req, res) => {
     }
 
     if (priceDropVariants.length > 0) {
-      for (const {
-        variant,
-        size,
-        newPrice,
-        compareAtPrice,
-      } of priceDropVariants) {
+      for (const { variant } of priceDropVariants) {
         const inventoryItem = await Inventory.findOne({
           where: { shopify_variant_id: String(variant.id) },
         });
