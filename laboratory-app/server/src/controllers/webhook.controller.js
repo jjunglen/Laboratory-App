@@ -105,8 +105,6 @@ const handleProductDelete = async (req, res) => {
   }
 };
 
-// HANDLE ORDER CREATE
-// POST /api/webhooks/shopify/orders/create
 const handleOrderCreate = async (req, res) => {
   try {
     const data = JSON.parse(req.body);
@@ -115,8 +113,6 @@ const handleOrderCreate = async (req, res) => {
     const customerEmail = data.email;
     const shopifyOrderId = String(data.id);
     const lineItems = data.line_items || [];
-
-    if (!customerEmail) return;
 
     const tags = (data.tags || "").toLowerCase();
     const sourceName = (data.source_name || "").toLowerCase();
@@ -128,6 +124,37 @@ const handleOrderCreate = async (req, res) => {
       console.log(`Skipping POS/store orders for ${customerEmail}`);
       return;
     }
+
+    // Definitive path: did this order carry our click attribute?
+    const clickAttr = (data.note_attributes || []).find(
+      (attr) => attr.name === "labsync_click_id",
+    );
+
+    if (clickAttr) {
+      const click = await AlertClick.findByPk(clickAttr.value);
+      if (click) {
+        const item = lineItems[0]; // cart permalink adds exactly one item
+        await Purchase.create({
+          user_id: click.user_id,
+          alert_id: click.alert_id,
+          shopify_order_id: shopifyOrderId,
+          shoe_name: click.shoe_name,
+          sku: click.sku,
+          size: click.size,
+          price_paid: parseFloat(item?.price) || null,
+          customer_email: customerEmail,
+          purchased_at: new Date(data.created_at),
+        });
+        console.log(
+          `Purchase attributed via click tag — ${click.shoe_name} for ${customerEmail}`,
+        );
+        return;
+      }
+    }
+
+    // Fallback: no click tag (e.g. they bought independently, not via
+    // a redirect link) — same soft matching as before
+    if (!customerEmail) return;
 
     const user = await User.findOne({ where: { email: customerEmail } });
     if (!user) return;
@@ -143,32 +170,26 @@ const handleOrderCreate = async (req, res) => {
     });
 
     for (const item of lineItems) {
-      const shoeName = item.title;
-      const sku = item.sku || null;
-      const price = parseFloat(item.price) || null;
-
       const matchedAlert = userAlerts.find((alert) => isItemMatch(alert, item));
       const matchedClick = recentClicks.find((click) =>
         isItemMatch(click, item),
       );
-
-      if (!matchedAlert && !matchedClick) {
-        continue;
-      }
+      if (!matchedAlert && !matchedClick) continue;
 
       await Purchase.create({
         user_id: user.id,
         alert_id: matchedAlert?.id || null,
         shopify_order_id: shopifyOrderId,
-        shoe_name: shoeName,
-        sku,
+        shoe_name: item.title,
+        sku: item.sku || null,
         size: item.variant_title?.split(" - ")?.[0] || null,
-        price_paid: price,
+        price_paid: parseFloat(item.price) || null,
         customer_email: customerEmail,
         purchased_at: new Date(data.created_at),
       });
-
-      console.log(`Purchase attributed — ${shoeName} for ${customerEmail}`);
+      console.log(
+        `Purchase attributed via matching — ${item.title} for ${customerEmail}`,
+      );
     }
   } catch (error) {
     console.error("Order create webhook error:", error.message);
