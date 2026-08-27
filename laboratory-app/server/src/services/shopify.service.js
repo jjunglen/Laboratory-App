@@ -76,7 +76,7 @@ const registerShopifyWebhooks = async (backendUrl) => {
       },
       {
         topic: "products/update",
-        address: `${backendUrl}/api/webhooks/shopify/products/delete`,
+        address: `${backendUrl}/api/webhooks/shopify/products/update`,
         format: "json"
       },
     ];

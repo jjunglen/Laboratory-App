@@ -13,7 +13,7 @@ const morgan = require("morgan");
 
 // Database connection
 const { sequelize } = require("./src/config/database.js");
-const { flushPendingNotifications } = require("./src/services/digest.service.js");
+const { flushPendingNotifications } = re4quire("./src/services/digest.service.js");
 
 // Models connection
 require("./src/models/index.js");
