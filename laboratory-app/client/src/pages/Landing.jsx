@@ -86,7 +86,7 @@ export default function Landing() {
             </p>
             <h1 className="text-2xl md:text-4xl font-bold leading-tight md:mb-6 mb-5">
               Get notified when your{" "}
-              <span className="text-blue-500">next pair</span> drops in store
+              <span className="text-blue-500">next pair</span> drops on our website
             </h1>
             <p className="text-zinc-400 text-xs font-medium md:text-lg max-w-md mx-auto mb-10">
               Set your size, pick your shoe, and we'll alert you the moment it
