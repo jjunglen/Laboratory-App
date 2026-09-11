@@ -154,8 +154,10 @@ function ShoeModal({ shoe, onClose }) {
   }, [shoe.shopify_url]);
 
   const handleBuyNow = () => {
+    const params = new URLSearchParams({ inventory_id: shoe.id });
+    if (shoe.alert_id) params.set("alert_id", shoe.alert_id);
     window.open(
-      `${import.meta.env.VITE_API_URL}/redirect?inventory_id=${shoe.id}`,
+      `${import.meta.env.VITE_API_URL}/redirect?${params.toString()}`,
       "_blank",
     );
   };
@@ -462,6 +464,29 @@ export default function Dashboard() {
     setTab(tabFromUrl || "instock");
   }, [location.search, location.pathname]);
 
+  // Opens the ShoeModal automatically when arriving from an email
+  // link (?item=<inventory_id>&alert=<alert_id>) — same modal used
+  // for normal browsing, just pre-opened for the linked item.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const itemId = params.get("item");
+    const alertId = params.get("alert");
+
+    if (!itemId) return;
+
+    const openFromEmail = async () => {
+      try {
+        const res = await api.get(`/inventory/${itemId}`);
+        const item = res.data.data;
+        setSelectedShoe(alertId ? { ...item, alert_id: alertId } : item);
+      } catch (err) {
+        console.error("Failed to load item from email link:", err);
+      }
+    };
+
+    openFromEmail();
+  }, [location.search]);
+
   const handleDeleteAlert = async (alertId) => {
     try {
       await api.delete(`/alerts/${alertId}`);
@@ -470,6 +495,20 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Failed to delete alert:", error);
     }
+  };
+
+  // Closes the modal AND cleans ?item=/?alert= out of the URL, so a
+  // refresh or back-button press doesn't silently reopen the same
+  // product. Keeps other params (like ?tab=) intact.
+  const closeShoeModal = () => {
+    setSelectedShoe(null);
+    const params = new URLSearchParams(location.search);
+    params.delete("item");
+    params.delete("alert");
+    const newSearch = params.toString();
+    navigate(`/dashboard${newSearch ? `?${newSearch}` : ""}`, {
+      replace: true,
+    });
   };
 
   const mySizes = user?.sizes || [];
@@ -521,7 +560,7 @@ export default function Dashboard() {
       <Navbar />
 
       {selectedShoe && (
-        <ShoeModal shoe={selectedShoe} onClose={() => setSelectedShoe(null)} />
+        <ShoeModal shoe={selectedShoe} onClose={closeShoeModal} />
       )}
 
       {/* Tabs */}

@@ -33,7 +33,7 @@ const sendNotification = async ({ alert, inventory }) => {
       return false;
     }
 
-    const redirectUrl = `${process.env.BACKEND_URL}/api/redirect?alert_id=${alert.id}&inventory_id=${inventory.id}`;
+    const redirectUrl = `${process.env.FRONTEND_URL}/dashboard?item=${inventory.id}&alert=${alert.id}`;
     const message = `${inventory.shoe_name} in size ${inventory.size} is now available for $${inventory.price} at The Laboratory DTX`;
 
     if (alert.notify_inapp) {
@@ -97,7 +97,7 @@ const sendPriceDropNotification = async ({ alert, inventory }) => {
     });
     if (recentEmail) return false;
 
-    const redirectUrl = `${process.env.BACKEND_URL}/api/redirect?alert_id=${alert.id}&inventory_id=${inventory.id}`;
+    const redirectUrl = `${process.env.FRONTEND_URL}/dashboard?item=${inventory.id}&alert=${alert.id}`;
     const message = `Price drop! ${inventory.shoe_name} in size ${inventory.size} is now $${inventory.price} (was $${inventory.compare_at_price}) at The Laboratory DTX`;
 
     if (alert.notify_inapp) {

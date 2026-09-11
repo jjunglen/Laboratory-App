@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,6 +12,8 @@ export default function Auth() {
     const [error, setError] = useState("");
     const [ submitting, setSubmitting] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [searchParams] = useSearchParams();
+
 
     const { login, register, setTokenFromGoogle } = useAuth();
 
@@ -70,13 +72,13 @@ export default function Auth() {
         // route based on whether the user have set sizes yet
         const hasSize = result.user?.sizes && result.user.sizes.length > 0;
 
-        navigate(hasSize ? "/dashboard" : "onboarding/size");
+        const redirectTo = searchParams.get("redirect");
+        navigate(redirectTo || (hasSize ? "/dashboard" : "onboarding/size"));
     };
 
     const handleGoogleLogin = () => {
         window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
-
-    }
+    };
 
     return (
         <div className="min-h-screen text-white bg-zinc-950">
