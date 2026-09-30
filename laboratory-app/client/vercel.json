@@ -1,8 +1,14 @@
 {
-  "rewrites": [
+  "redirects": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/",
+      "destination": "https://laboratory.syncstock.io/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://laboratory.syncstock.io/store/dashboard",
+      "permanent": true
     }
   ]
 }
